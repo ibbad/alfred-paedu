@@ -4,7 +4,7 @@ Authentication module for Authentication RestAPI/ Webapp.
 
 from flask import g, request, current_app
 from flask.ext.httpauth import HTTPBasicAuth
-from app.models import Subscriber, AnonymousUser
+from app.models import User, AnonymousUser
 from app.user_api_1_0 import api
 from app.api_errors import unauthorized
 
@@ -21,13 +21,13 @@ def verify_password(email_or_username_or_token, password):
     # username/email-address used
     user = User.objects(email=email_or_username_or_token).first() \
         or user.objects(username=email_or_username_or_token).first()
-    if subscriber is not None:
-        g.current_user = subscriber
+    if user is not None:
+        g.current_user = user
         g.token_used = False
         return user.verify_password(password)
 
     # token used
-    g.current_user = Subscriber.verify_auth_token(email_or_username_or_token)
+    g.current_user = User.verify_auth_token(email_or_username_or_token)
     g.token_used = True
     return g.current_user is not None
 
