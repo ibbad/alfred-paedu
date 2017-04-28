@@ -1,0 +1,130 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+    Alfred-PAEdu
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <!--Add other style files you want to include in the head part.-->
+        <link rel="stylesheet" type="'text/css"
+              href="{{ url_for('static', filename='styles.css') }}">
+        <script type="text/javascript"
+                src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}">
+        </script>
+
+{% endblock %}
+
+
+{% block styles %}
+    {{ super() }}
+    <link  href="{{ url_for('static', filename='styles.css') }}"
+           rel="stylesheet">
+    <!--Add other style files-->
+{% endblock %}
+
+{% block scripts%}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    <!--Add other script files-->
+
+    <link rel="stylesheet" type="'text/css"
+          href="{{ url_for('static', filename='styles.css') }}">
+    <script type="text/javascript"
+            src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}">
+    </script>
+
+{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url_for('user_app.profile_page',
+            username_or_email=current_user.username)}}">
+            </a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="{{ url_for('user_app.index')}}">Home</a>
+                </li>
+                {% if current_user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Profile
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="{{ url_for('user_app.profile_page',
+                            username_or_email=current_user.username) }}">
+                                {{ current_user.username }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('user_app.edit_profile')}}">
+                                Edit profile
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ current_user.gravatar(size=18) }}">
+                        Account <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('auth_webapp.change_password')
+                                }}">
+                            Change Password
+                        </a></li>
+                        <li><a href="{{
+                                url_for('auth_webapp.change_username_request')
+                                }}">
+                            Change username
+                        </a></li>
+                        <li><a href="{{
+                                url_for('auth_webapp.change_email_request')}}">
+                            Change email
+                        </a></li>
+                        <li><a href="{{ url_for('auth_webapp.logout') }}">
+                            Logout
+                        </a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li><a href="{{ url_for('auth_webapp.login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert">
+                &times;
+            </button>
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        {% block page_content %}
+        {% endblock %}
+    </div>
+{% endblock %}
