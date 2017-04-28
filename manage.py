@@ -1,12 +1,12 @@
 """
 Main module for managing Alfred-PAEdu application
 """
+import os
 import sys
 import logging
-from botapp import create_app, db
-from botapp.models import MyBot, Message
+from app import create_app, db
+from app.models import User, Permission
 from flask_script import Manager, Shell
-from telegram.error import NetworkError
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - '
@@ -14,12 +14,7 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-try:
-    app = create_app(os.environ.get('FLASK_CONFIG') or 'default')
-except NetworkError:
-    logger.error('Network error while communicating with Alfred, please '
-                 'try again.')
-    sys.exit(-1)
+app = create_app(os.environ.get('FLASK_CONFIG') or 'default')
 manager = Manager(app)
 
 
@@ -28,8 +23,7 @@ def make_shell_context():
     Make context for Shell.
     :return: Application models, database and application object.
     """
-    return dict(app=app, User=User, db=db,
-                Address=Address, Permission=Permission)
+    return dict(app=app, User=User, Permission=Permission, db=db)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 
@@ -67,4 +61,4 @@ def secureserver():
 
 
 if __name__ == '__main__':
-manager.run()
+    manager.run()
