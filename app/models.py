@@ -95,6 +95,21 @@ class Wallpost(db.Document):
 	comments = db.ListField(db.StringField())
 	tags = db.ListField(db.StringField())
 
+	def to_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def from_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def generate_fake(count=10):
+		# TODO: implement this
+		pass	
+
+
 class WallpostComment(db.Document):
 	__collectionname__ = 'WallpostComments'
 	id = db.SequenceField(primary_key=True)
@@ -103,6 +118,21 @@ class WallpostComment(db.Document):
 	timestamp = db.DateTimeField(default=datetime.utcnow())
 	commenter_id = db.IntField(min_value=1)
 	wallpost_id = db.IntField(min_value=1)
+
+	def to_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def from_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def generate_fake(count=10):
+		# TODO: implement this
+		pass	
+
 
 class Diary(db.Document):
 	__collectionname__ = 'diary'
@@ -114,6 +144,21 @@ class Diary(db.Document):
 	tags = db.ListField(db.StringField())
 	# No comments for personal diary
 
+	def to_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def from_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def generate_fake(count=10):
+		# TODO: implement this
+		pass	
+
+
 class Activity(db.Document):
 	__collectionname__ = 'activity'
 	id = db.SequenceField(primary_key=True)
@@ -123,6 +168,56 @@ class Activity(db.Document):
 	tags= db.ListField(db.StringField())
 	interested = db.ListField(db.IntField(min_value=1))
 	going = db.ListField(db.IntField(min_value=1))
+
+	def to_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def from_json():
+		# TODO: implement this
+		pass
+
+	@staticmethod
+	def generate_fake(count=10):
+		# TODO: implement this
+		pass	
+
+
+class Suggestions(db.Document):
+	__collectionname__ = 'suggestions'
+	id = db.SequenceField(primary_key=True)
+	query = db.StringField()
+	responses = db.ListField(db.StringField())
+
+	def to_json(self):
+		return {
+			"id": self.id,
+			"query": self.query,
+			"responses": self.responses
+		}
+
+	@staticmethod
+	def from_json(json_data):
+		try:
+			s= Suggestions()
+			s.query = json_data.get('query')
+			s.responses = json_data.get('responses')
+		except Exception as e:
+			logging.error('Unable to load suggestion from json data. Error={0}'.format(e))
+
+	@staticmethod
+	def generate_fake(count=10):
+		# TODO: implement this
+		pass	
+
+	@staticmethod
+	def load_data_from_csv(filepath):
+		"""
+		This function reads a .csv file containing possible queries and their possible answers.
+		"""
+		# TODO: Implement Read the csv file and load queries+answers to the database.
+		pass
 
 class User(UserMixin, db.Document):
     """
@@ -140,6 +235,7 @@ class User(UserMixin, db.Document):
     confirmed = db.BooleanField(default=False)
     avatar_hash = db.StringField(max_length=32)
     permissions = db.IntField(default=None)
+    role = db.IntField(default=0) 	# User:0, Student=1, Parent=2, Teacher=3
 
     # User information
     # FIXME: Remove extra fields
@@ -154,6 +250,7 @@ class User(UserMixin, db.Document):
     parents = db.ListField(db.IntField(min_value=1), default=[])
     friends = db.ListField(db.IntField(min_value=1), default=[])
     teachers = db.ListField(db.IntField(min_value=1), default=[])
+    kids = db.ListField(db.IntField(min_value=1), default=[])
 
     # Define indexes
     # FIXME: Check the tradeoff between hashed and plain-text indexes.
@@ -412,6 +509,42 @@ class User(UserMixin, db.Document):
         if json_data.get('address') is not None:
             self.address = Address.from_json(json_data.get('address'))
         self.save()
+
+    def is_teacher(self):
+    	"""
+    	Checks whether given user is a teacher
+    	"""
+    	return True if self.role == 3 else False
+
+    def is_parent(self):
+    	"""
+    	Checks whether given user is a parent
+    	"""
+    	return True if self.role == 2 else False
+
+    def is_student(self):
+    	"""
+    	Checks whether given user is a student
+    	"""
+    	return True if self.role == 1 else False
+
+    def is_student_of(self, user):
+    	"""
+    	Checks whether given user is a student of another user
+    	"""
+    	return True if user.id in self.teaching else False
+
+    def is_child_of(self, user):
+    	"""
+    	Checks whether given user is a child of another user
+    	"""
+    	return True if user.id in self.parents else False
+
+    def is_friend_of(self, user):
+    	"""
+    	Checks whether given user is a friend of another user
+    	"""
+    	return True if user.id in self.friends else False
 
     def __repr__(self):
         return '<User %r>' % self.username
