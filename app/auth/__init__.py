@@ -2,7 +2,7 @@
 Initialize authorization webapp module blue print and set logging mechanism.
 """
 
-from app.common.loggingModule import setup_logging
+from app.common.logging_module import setup_logging
 from flask import Blueprint
 
 auth = Blueprint('auth', __name__)

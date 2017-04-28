@@ -23,7 +23,7 @@ def setup_logging(name, filename, max_file_size, backup_files):
                                    '%(levelname)s - %(message)s')
 
     if not os.path.exists(path=filename):
-        superMakedirs('/'.join(filename.split('/')[:-1]), 775)
+        super_make_dirs('/'.join(filename.split('/')[:-1]), 775)
 
     log_fh = RotatingFileHandler(filename,
                                  maxBytes=max_file_size,
