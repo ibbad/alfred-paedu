@@ -1,10 +1,8 @@
 import hashlib
-import random
 import logging
-from datetime import datetime, timedelta
-from mongoengine import ValidationError
+from datetime import datetime
 from mongoengine.queryset import NotUniqueError
-from flask import current_app, request, url_for
+from flask import current_app, request, url_for, jsonify
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
@@ -85,33 +83,99 @@ class Address(db.EmbeddedDocument):
                self.city+', '+self.country
 
 
+class Tag(db.Document):
+    __collectionname__ = "Tag"
+    id = db.SequenceField(primary_key=True)
+    name = db.StringField(unique=True)
+
+    def to_json(self):
+        return jsonify({
+            "id": self.id,
+            "name": self.name
+        })
+
+    @staticmethod
+    def from_json(data):
+        if data.get('name'):
+            tag = Tag()
+            tag.name = data.get('name')
+            tag.save()
+
+    @staticmethod
+    def generate_fake(count=10):
+        from mongoengine import ValidationError
+        from random import seed
+        import forgery_py
+
+        seed()
+        c = 0
+        while c < count:
+            try:
+                Tag(name=forgery_py.lorem_ipsum.word()).save()
+            except (ValidationError, NotUniqueError):
+                pass
+            except Exception:
+                pass
+
+
 class Wallpost(db.Document):
-    __collectionname__ = 'wallpost'
+    __collectionname__ = "Wallpost"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
     body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=1)
-    comments = db.ListField(db.StringField())
-    tags = db.ListField(db.StringField())
+    comments = db.ListField(db.IntField(), default=[])
+    tags = db.ListField(db.IntField())
 
     def to_json(self):
-        # TODO: implement this
-        pass
+        return jsonify({
+            "id": self.id,
+            "body": self.body,
+            "body_html": self.body_html,
+            "timestamp": self.timestamp,
+            "author": User.objects(id=self.author_id).username or '',
+            "comments": [WallpostComments.objects(id=i).first().body for i in
+                         self.comments] or [],
+            "tags": [Tag.objects(id=i) for i in self.tags] or []
+        })
 
     @staticmethod
-    def from_json():
-        # TODO: implement this
-        pass
+    def from_json(data, author_id=0):
+        try:
+            wp = Wallpost()
+            wp.body = data.get('body') or ''
+            wp.body = data.get('body_html') or ''
+            if wp.body == '' and wp.body_html == '':
+                logging.error('No data in body/body_html provided for '
+                              'creating wallpost object')
+                return
+            if author_id == 0:
+                if data.get('author_id') is None:
+                    logging.error('No author provided with wallpost.')
+                    return
+                else:
+                    wp.author_id = data.get('author_id')
+            else:
+                wp.author_id = data.get('author_id')
+            if data.get('tags') is not None and type(data.get('tags') is list):
+                [wp.tags.append(tag) for tag in data.get('tags')]
+            else:
+                logging.warning('No tags loaded from the json data for '
+                                'wallpost.')
+            wp.save()
+        except Exception as el1:
+            logging.error('Unable to get wallpost object from json data. '
+                          'Error={}'.format(el1))
+            return
 
     @staticmethod
     def generate_fake(count=10):
         # TODO: implement this
         pass
 
-
-class WallpostComment(db.Document):
-    __collectionname__ = 'WallpostComments'
+class WallpostComments(db.Document):
+    __collectionname__ = "WallpostComments"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
     body_html = db.StringField()
@@ -165,12 +229,14 @@ class Activity(db.Document):
     body = db.StringField()
     body_html = db.StringField()
     timestamp = db.StringField()
-    tags= db.ListField(db.StringField())
+    tags = db.ListField(db.StringField())
     interested = db.ListField(db.IntField(min_value=1))
     going = db.ListField(db.IntField(min_value=1))
 
     def to_json(self):
-        # TODO: implement this
+        return jsonify({
+
+        })
         pass
 
     @staticmethod
