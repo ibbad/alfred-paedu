@@ -84,7 +84,7 @@ class Address(db.EmbeddedDocument):
             return None
 
     @staticmethod
-    def from_json(json_address):
+    def from_json(data):
         """
         Extracts and returns address object from JSON data.
         :param json_address: Address object in JSON format.
@@ -92,11 +92,11 @@ class Address(db.EmbeddedDocument):
         """
         try:
             return Address(
-                street=json_address.get('street') or '',
-                city=json_address.get('city') or '',
-                postalcode=json_address.get('postal_code') or '',
-                state=json_address.get('state') or '',
-                country=json_address.get('country') or '',
+                street=data.get('street') or '',
+                city=data.get('city') or '',
+                postalcode=data.get('postal_code') or '',
+                state=data.get('state') or '',
+                country=data.get('country') or '',
             )
         except Exception as el1:
             logging.error('Unable to extract address object from json '
@@ -467,7 +467,9 @@ class Diary(db.Document):
                                 for _ in range(1, 5)],
                     o_time=random.randint(1, 5),
                 ).save()
-            except Exception as el1:
+            except (ValidationError, NotUniqueError):
+                pass
+            except Exception:
                 pass
 
 
@@ -588,6 +590,8 @@ class Activity(db.Document):
                     going=[random.choice(users)
                            for _ in range(1, random.randint(1, 5))],
                 ).save()
+            except (ValidationError, NotUniqueError):
+                pass
             except Exception:
                 pass
 
@@ -621,7 +625,7 @@ class Suggestion(db.Document):
             return None
 
     @staticmethod
-    def from_json(json_data):
+    def from_json(data):
         """
         This function converts suggestions object's JSON representation to
         database object and return it.
@@ -630,8 +634,8 @@ class Suggestion(db.Document):
         """
         try:
             s = Suggestion()
-            s.query = json_data.get('query')
-            s.responses = json_data.get('responses')
+            s.query = data.get('query')
+            s.responses = data.get('responses')
             return s
         except Exception as e:
             logging.error('Unable to load suggestion from json data. '
@@ -655,6 +659,8 @@ class Suggestion(db.Document):
                            responses=[forgery_py.lorem_ipsum.sentence() for _
                                       in range(0, random.randint(1, 5))]).save()
                 c += 1
+            except (ValidationError, NotUniqueError):
+                pass
             except Exception:
                 pass
 
@@ -928,42 +934,42 @@ class User(UserMixin, db.Document):
         return json_user
 
     @staticmethod
-    def from_json(json_data):
+    def from_json(data):
         """
         Register a new user document from the json data.
         :return: User object that is created from json data.
         """
         try:
-            user = User(username=json_data.get('username'),
-                        email=json_data.get('email'))
-            if json_data.get('password') is None:
+            user = User(username=data.get('username'),
+                        email=data.get('email'))
+            if data.get('password') is None:
                 return None
-            user.set_password(json_data.get('password'))
-            if json_data.get('name') is not None:
-                user.first_name = json_data.get('name')['first'] or ''
-                user.last_name = json_data.get('name')['last'] or ''
-            user.company = json_data.get('company') or ''
-            user.phone = json_data.get('phone') or ''
-            user.address = Address.from_json(json_data.get('address')) \
-                if json_data.get('address') else None
+            user.set_password(data.get('password'))
+            if data.get('name') is not None:
+                user.first_name = data.get('name')['first'] or ''
+                user.last_name = data.get('name')['last'] or ''
+            user.company = data.get('company') or ''
+            user.phone = data.get('phone') or ''
+            user.address = Address.from_json(data.get('address')) \
+                if data.get('address') else None
             return user
         except Exception as el1:
             logging.error('Unable to load user object from json data. Error={'
                           '0}'.format(el1))
             return None
 
-    def update_from_json(self, json_data):
+    def update_from_json(self, data):
         """
         Update the user document from json data.
         Note: username, email and password must be changed using tokens only.
         """
-        if json_data.get('name') is not None:
-            self.first_name = json_data.get('name')['first'] or self.first_name
-            self.last_name = json_data.get('name')['last'] or self.last_name
-        self.company = json_data.get('company') or self.company
-        self.phone = json_data.get('phone') or self.phone
-        if json_data.get('address') is not None:
-            self.address = Address.from_json(json_data.get('address'))
+        if data.get('name') is not None:
+            self.first_name = data.get('name')['first'] or self.first_name
+            self.last_name = data.get('name')['last'] or self.last_name
+        self.company = data.get('company') or self.company
+        self.phone = data.get('phone') or self.phone
+        if data.get('address') is not None:
+            self.address = Address.from_json(data.get('address'))
         self.save()
 
     def is_teacher(self):
@@ -1037,7 +1043,7 @@ class User(UserMixin, db.Document):
                 usr.set_password('password')
                 usr.save()
                 c += 1
-            except ValidationError:
+            except (ValidationError, NotUniqueError):
                 pass
             except Exception:
                 pass
