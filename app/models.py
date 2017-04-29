@@ -1,7 +1,13 @@
+"""
+Module containing blueprints for application models.
+"""
+
 import random
 import hashlib
 import logging
+import forgery_py
 from datetime import datetime
+from mongoengine import ValidationError
 from mongoengine.queryset import NotUniqueError
 from flask import current_app, request, url_for, jsonify
 from flask.ext.login import UserMixin, AnonymousUserMixin
@@ -60,24 +66,42 @@ class Address(db.EmbeddedDocument):
     country = db.StringField(max_length=20)
 
     def to_json(self):
-        json_address = {
-            "street": self.street,
-            "city": self.city,
-            "postal_code": self.postalcode,
-            "state": self.state,
-            "country": self.country,
-        }
-        return json_address
+        """
+        Converts and returns address object as a JSON string.
+        :return address object: json string
+        """
+        try:
+            return jsonify({
+                "street": self.street,
+                "city": self.city,
+                "postal_code": self.postalcode,
+                "state": self.state,
+                "country": self.country,
+            })
+        except Exception as el1:
+            logging.error('Unable to convert address object to json. Error={'
+                          '0}'.format(el1))
+            return None
 
     @staticmethod
     def from_json(json_address):
-        return Address(
-            street=json_address.get('street') or '',
-            city=json_address.get('city') or '',
-            postalcode=json_address.get('postal_code') or '',
-            state=json_address.get('state') or '',
-            country=json_address.get('country') or '',
-        )
+        """
+        Extracts and returns address object from JSON data.
+        :param json_address: Address object in JSON format.
+        :return address: object or None
+        """
+        try:
+            return Address(
+                street=json_address.get('street') or '',
+                city=json_address.get('city') or '',
+                postalcode=json_address.get('postal_code') or '',
+                state=json_address.get('state') or '',
+                country=json_address.get('country') or '',
+            )
+        except Exception as el1:
+            logging.error('Unable to extract address object from json '
+                          'data provided. Error={0}'.format(el1))
+            return None
 
     def __repr__(self):
         return '<Address: %s>' % self.street+', '+self.postalcode+', ' + \
@@ -85,35 +109,64 @@ class Address(db.EmbeddedDocument):
 
 
 class Tag(db.Document):
+    """
+    This blueprint is for Tag document. Tags can be associated to wallposts,
+    comments, activities etc.
+    """
     __collectionname__ = "Tag"
     id = db.SequenceField(primary_key=True)
-    name = db.StringField(unique=True)
+    text = db.StringField(unique=True)
 
     def to_json(self):
-        return jsonify({
-            "id": self.id,
-            "name": self.name
-        })
+        """
+        Returns a JSON representation of Tag object.
+        :return TAG: JSON object
+        """
+        try:
+            return jsonify({
+                "id": self.id,
+                "text": self.text
+            })
+        except Exception as el1:
+            logging.error('Unable to convert tag object to json. Error={'
+                          '0}'.format(el1))
+            return None
 
     @staticmethod
     def from_json(data):
-        if data.get('name'):
-            tag = Tag()
-            tag.name = data.get('name')
-            tag.save()
+        """
+        Extract a tag text from json object<.
+        :param data: json data containing tag object
+        :return Tag: object or None
+        """
+        try:
+            if data.get('text'):
+                tag = Tag()
+                tag.text = data.get('text')
+                logging.info('Tag={0} successfully extracted from json '
+                             'data.'.format(tag.text))
+                return tag
+            else:
+                logging.warning('No text provided for the tag.')
+                return None
+        except Exception as el1:
+            logging.error('Unable to store requested tag in the database. '
+                          'Error={0}'.format(el1))
+            return None
 
     @staticmethod
     def generate_fake(count=10):
-        from mongoengine import ValidationError
-        from random import seed
-        import forgery_py
-
-        seed()
+        """
+        This function generates dummy tags and stores them in the database.
+        :param count:
+        :return:
+        """
+        random.seed()
         c = 0
         while c < count:
             try:
-                Tag(name=forgery_py.lorem_ipsum.word()).save()
-                count += 1
+                Tag(text=forgery_py.lorem_ipsum.word()).save()
+                c += 1
             except (ValidationError, NotUniqueError):
                 pass
             except Exception:
@@ -121,6 +174,10 @@ class Tag(db.Document):
 
 
 class Wallpost(db.Document):
+    """
+    This blueprint represents a wallpost object. Wallposts are written by
+    users and other users can comment on these wallposts.
+    """
     __collectionname__ = "Wallpost"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
@@ -131,20 +188,35 @@ class Wallpost(db.Document):
     tags = db.ListField(db.IntField())
 
     def to_json(self):
-        return jsonify({
-            "id": self.id,
-            "body": self.body,
-            "body_html": self.body_html,
-            "timestamp": self.timestamp,
-            "author": User.objects(id=self.author_id).username or '',
-            "author_id": self.author_id,
-            "comments": [WallpostComments.objects(id=i).first().body for i in
-                         self.comments] or [],
-            "tags": [Tag.objects(id=i) for i in self.tags] or []
-        })
+        """
+        Convert wallpost object to JSON formatted string.
+        :return wallpost: JSON object.
+        """
+        try:
+            return jsonify({
+                "id": self.id,
+                "body": self.body,
+                "body_html": self.body_html,
+                "timestamp": self.timestamp,
+                "author": User.objects(id=self.author_id).username or '',
+                "author_id": self.author_id,
+                "comments": [Comment.objects(id=i).first().body for i in
+                             self.comments] or [],
+                "tags": [Tag.objects(id=i) for i in self.tags] or []
+            })
+        except Exception as el1:
+            logging.error('Unable to convert wallpost object to json. '
+                          'Error={0}'.format(el1))
+            return None
 
     @staticmethod
     def from_json(data, author_id=0):
+        """
+        Extract and returns a wallpost object from json data provided by user.
+        :param data: json data for the wall post.
+        :param author_id: User ID for the author of post.
+        :return wallpost: object
+        """
         try:
             wp = Wallpost()
             wp.body = data.get('body') or None
@@ -152,11 +224,11 @@ class Wallpost(db.Document):
             if wp.body is None and wp.body_html is None:
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost object')
-                return
+                return None
             if author_id == 0:
                 if data.get('author_id') is None:
                     logging.error('No author provided with wallpost.')
-                    return
+                    return None
                 else:
                     wp.author_id = data.get('author_id')
             else:
@@ -166,25 +238,19 @@ class Wallpost(db.Document):
             else:
                 logging.warning('No tags loaded from the json data for '
                                 'wallpost.')
-            wp.save()
             return wp
         except Exception as el1:
             logging.error('Unable to get wallpost object from json data. '
                           'Error={}'.format(el1))
-            return
+            return None
 
     @staticmethod
     def generate_fake(count=10):
         """
-        Generates fake wallposts and store them in the database.
-        :param count: Number of fakes wallposts to be generated
-        :return:
+        Generates fake wall posts and store them in the database.
+        :param count: Number of fakes wall posts to be generated.
         """
-        from mongoengine import ValidationError
-        from random import seed
-        import forgery_py
-
-        seed()
+        random.seed()
         c = 0
 
         if User.objects.count() == 0:
@@ -194,7 +260,7 @@ class Wallpost(db.Document):
         while c < count:
             try:
                 tag_list = Tag.objects.values_list('id')
-                wp_comment_list = WallpostComments.objects.values_list('id')
+                wp_comment_list = Comment.objects.values_list('id')
                 Wallpost(
                     body=forgery_py.lorem_ipsum.sentences(quantity=3),
                     body_html=forgery_py.lorem_ipsum.paragraphs(
@@ -205,14 +271,19 @@ class Wallpost(db.Document):
                     tags=[random.choice(tag_list)
                           for _ in range(0, random.randint(1, 5))]
                 ).save()
+                c += 1
             except (ValidationError, NotUniqueError):
                 pass
             except Exception:
                 pass
 
 
-class WallpostComment(db.Document):
-    __collectionname__ = "WallpostComment"
+class Comment(db.Document):
+    """
+    This document is the blue print for a comment. A comment may be
+    associated to wallpost, activity, or any other kind of post.
+    """
+    __collectionname__ = "Comment"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
     body_html = db.StringField()
@@ -220,22 +291,37 @@ class WallpostComment(db.Document):
     commenter_id = db.IntField(min_value=1)
 
     def to_json(self):
-        return jsonify({
-            "id": self.id,
-            "body": self.body,
-            "body_html": self.body_html,
-            "commenter_id": self.commenter_id,
-            "commenter": User.objects(id=self.commenter_id).first().username
-                         or ''
-        })
+        """
+        Convert a Comment object to json.
+        :return comment: str in json format.
+        """
+        try:
+            return jsonify({
+                "id": self.id,
+                "body": self.body,
+                "body_html": self.body_html,
+                "commenter_id": self.commenter_id,
+                "commenter": User.objects(id=self.commenter_id).first().username
+                             or ''
+            })
+        except Exception as el1:
+            logging.error('Unable to convert comment object to json. Error={'
+                          '0}'.format(el1))
+            return None
 
     @staticmethod
     def from_json(data, commenter_id=0):
+        """
+        Store a comment from json data to the database.
+        :param data: json data for the comment
+        :param commenter_id: Id of the user who posted/registered the comment.
+        :return comment: comment object
+        """
         try:
-            wpc = WallpostComment()
-            wpc.body = data.get('body') or None
-            wpc.body_html = data.get('body_html') or None
-            if wpc.body is None and wpc.body_html is None:
+            c = Comment()
+            c.body = data.get('body') or None
+            c.body_html = data.get('body_html') or None
+            if c.body is None and c.body_html is None:
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost comments object')
                 return
@@ -245,23 +331,23 @@ class WallpostComment(db.Document):
                                   'comments.')
                     return
                 else:
-                    wpc.commenter_id = data.get('commenter_id')
+                    c.commenter_id = data.get('commenter_id')
             else:
-                wpc.commenter_id = data.get('commenter_id')
-            wpc.save()
-            return wpc
+                c.commenter_id = data.get('commenter_id')
+            c.save()
+            return c
         except Exception as el1:
-            logging.error('Unable to get wallpost comments object from json '
+            logging.error('Unable to get comments object from json '
                           'data. Error={}'.format(el1))
             return
 
     @staticmethod
     def generate_fake(count=10):
-        from mongoengine import ValidationError
-        from random import seed
-        import forgery_py
-
-        seed()
+        """
+        Generates fake wallpost comments and store them in the database.
+        :param count: Number of fakes wallpost comments to be generated
+        """
+        random.seed()
         c = 0
 
         if User.objects.count() == 0:
@@ -270,12 +356,13 @@ class WallpostComment(db.Document):
             return
         while c < count:
             try:
-                WallpostComment(
+                Comment(
                     body=forgery_py.lorem_ipsum.sentences(quantity=1),
                     body_html=forgery_py.lorem_ipsum.paragraphs(
                         quantity=1, html=True, sentences_quantity=1),
                     commenter_id=random.choice(User.objects.values_list('id')),
                 ).save()
+                c += 1
             except (ValidationError, NotUniqueError):
                 pass
             except Exception:
