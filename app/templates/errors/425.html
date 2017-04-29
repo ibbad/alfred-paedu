@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Alfred - Invalid data
+{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Data not provided with request</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+</div>
+{% endblock %}
