@@ -344,8 +344,9 @@ class Comment(db.Document):
     @staticmethod
     def generate_fake(count=10):
         """
-        Generates fake wallpost comments and store them in the database.
-        :param count: Number of fakes wallpost comments to be generated
+        Generates specific number of fake comments and store them in the
+        database.
+        :param count: Number of fakes comments to be generated.
         """
         random.seed()
         c = 0
@@ -467,7 +468,7 @@ class User(UserMixin, db.Document):
     User document structure.
     """
     # FIXME: Decide a schema and move to Document instead of Dynamic document.
-    __collectionname__ = 'subscriber'
+    __collectionname__ = 'user'
     id = db.SequenceField(primary_key=True)
     # FIXME: ensure uniqueness of email and username in business logic.
     email = db.EmailField(regex=EMAIL_REGEX, max_length=64, required=True,
@@ -518,7 +519,7 @@ class User(UserMixin, db.Document):
 
     def set_password(self, password):
         """
-        Generate and store password hash for the subscriber.
+        Generate and store password hash for the user.
         :param password: user provided password.
         """
         self.password_hash = generate_password_hash(password)
@@ -533,9 +534,9 @@ class User(UserMixin, db.Document):
 
     def can(self, permission):
         """
-        Returns if a subscriber has enough permission to perform an operation.
+        Returns if a user has enough permission to perform an operation.
         :param permission: Permission name.
-        :return: True if subscriber has a permission.
+        :return: True if user has a permission.
         """
         return (self.permissions & permission) == permission
 
@@ -647,8 +648,8 @@ class User(UserMixin, db.Document):
     def generate_login_change_token(self, username_or_email, expiration=3600):
         """
         Generates a new token for changing login information (i.e. username,
-        email address) of valid subscriber. This token contains the changed
-        username/email information of subscriber and using this token will
+        email address) of valid user. This token contains the changed
+        username/email information of user and using this token will
         change the username/email address in the database.
         :param username_or_email: new login information i.e.
         username/email address.
@@ -689,7 +690,7 @@ class User(UserMixin, db.Document):
         :param size: size of image (default=100).
         :param default: default style for avatar icon.
         :param rating: rating for avatar icon.
-        :return: url for subscriber's avatar icon.
+        :return: url for user's avatar icon.
         """
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
@@ -703,11 +704,11 @@ class User(UserMixin, db.Document):
 
     def to_json(self):
         """
-        Gives a json representation of the subscriber.
-        :return: json representation of subscriber document.
+        Gives a json representation of the user.
+        :return: json representation of user document.
         """
-        json_subscriber = {
-            'url': url_for('api.get_subscriber', sub_id=self.id,
+        json_user = {
+            'url': url_for('api.get_user', sub_id=self.id,
                            _external=True),
             'username': self.username,
             'name': '%s %s' % (self.first_name, self.last_name),
@@ -716,32 +717,36 @@ class User(UserMixin, db.Document):
             'phone': self.phone,
             'email': self.email,
         }
-        return json_subscriber
+        return json_user
 
     @staticmethod
     def from_json(json_data):
         """
-        Register a new subscriber document from the json data.
+        Register a new user document from the json data.
         :return: User object that is created from json data.
         """
-        subscriber = User(username=json_data.get('username'),
-                                email=json_data.get('email'))
-        if json_data.get('password') is None:
+        try:
+            user = User(username=json_data.get('username'),
+                        email=json_data.get('email'))
+            if json_data.get('password') is None:
+                return None
+            user.set_password(json_data.get('password'))
+            if json_data.get('name') is not None:
+                user.first_name = json_data.get('name')['first'] or ''
+                user.last_name = json_data.get('name')['last'] or ''
+            user.company = json_data.get('company') or ''
+            user.phone = json_data.get('phone') or ''
+            user.address = Address.from_json(json_data.get('address')) \
+                if json_data.get('address') else None
+            return user
+        except Exception as el1:
+            logging.error('Unable to load user object from json data. Error={'
+                          '0}'.format(el1))
             return None
-        subscriber.set_password(json_data.get('password'))
-        if json_data.get('name') is not None:
-            subscriber.first_name = json_data.get('name')['first'] or ''
-            subscriber.last_name = json_data.get('name')['last'] or ''
-        subscriber.company = json_data.get('company') or ''
-        subscriber.phone = json_data.get('phone') or ''
-        subscriber.address = Address.from_json(json_data.get('address')) \
-            if json_data.get('address') \
-            else None
-        return subscriber
 
     def update_from_json(self, json_data):
         """
-        Update the subscriber document from json data.
+        Update the user document from json data.
         Note: username, email and password must be changed using tokens only.
         """
         if json_data.get('name') is not None:
@@ -793,19 +798,15 @@ class User(UserMixin, db.Document):
         return '<User %r>' % self.username
 
     @staticmethod
-    def generate_fake(fakes_required=100):
+    def generate_fake(count=10):
         """
         Generates fake users and store them in the database.
-        :param fakes_required: Number of fakes to generate
-        :return:
+        :param count: Number of fakes users to be generated.
         """
-        from mongoengine import ValidationError
-        from random import seed
-        import forgery_py
 
-        seed()
-        fakes = 0
-        while fakes < fakes_required:
+        random.seed()
+        c = 0
+        while c < count:
             try:
                 usr = User(
                     username=forgery_py.internet.user_name(with_num=True),
@@ -827,7 +828,7 @@ class User(UserMixin, db.Document):
                 usr.confirmed = True
                 usr.set_password('password')
                 usr.save()
-                fakes += 1
+                c += 1
             except ValidationError:
                 pass
             except Exception:
