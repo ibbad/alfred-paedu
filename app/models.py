@@ -87,7 +87,7 @@ class Address(db.EmbeddedDocument):
     def from_json(data):
         """
         Extracts and returns address object from JSON data.
-        :param json_address: Address object in JSON format.
+        :param data: Address object in JSON format.
         :return address: object or None
         """
         try:
@@ -158,7 +158,7 @@ class Tag(db.Document):
     def generate_fake(count=10):
         """
         This function generates dummy tags and stores them in the database.
-        :param count:
+        :param count: number of fake tags to be created
         :return:
         """
         random.seed()
@@ -489,7 +489,7 @@ class Activity(db.Document):
     tags = db.ListField(db.StringField())
     interested = db.ListField(db.IntField(min_value=1))
     going = db.ListField(db.IntField(min_value=1))
-    comments = db.ListField(db.StringField())      # string must be Comment:json
+    comments = db.ListField(db.StringField())     # string must be Comment:json
 
     def to_json(self):
         """
@@ -508,9 +508,9 @@ class Activity(db.Document):
                 "interested": [User.objects(id=i).first().username
                                for i in self.interested],
                 "going": [User.objects(id=i).first().username
-                               for i in self.going],
+                          for i in self.going],
                 "comments": [Comment.objects(id=i).first().body
-                               for i in self.comments]
+                             for i in self.comments]
             })
         except Exception as el1:
             logging.error('Unable to convert activity object={0} to JSON. '
@@ -629,7 +629,7 @@ class Suggestion(db.Document):
         """
         This function converts suggestions object's JSON representation to
         database object and return it.
-        :param json_data: json representation of suggestion object.
+        :param data: json representation of suggestion object.
         :return suggestion: object.
         """
         try:
@@ -672,9 +672,23 @@ class Suggestion(db.Document):
         :param filepath: path to csv file for lading
         :return:
         """
-        # TODO: Implement Read the csv file and load queries+answers to
-        # the database.
-        pass
+        count = 0
+        try:
+            with open(filepath, 'r') as f:
+                next(f)
+                for line in f:
+                    data = line.split(',')
+                    try:
+                        Suggestion(query=data[0], responses=data[1:]).save()
+                        count += 1
+                    except Exception:
+                        pass
+            logging.info('{0} entries read to suggestion table from csv '
+                         'file.'.format(count))
+            return count
+        except Exception as el1:
+            logging.error('Unable to load suggestion data from csv file. '
+                          'Error={0}'.format(el1))
 
 
 class User(UserMixin, db.Document):
@@ -1017,12 +1031,11 @@ class User(UserMixin, db.Document):
         Generates fake users and store them in the database.
         :param count: Number of fakes users to be generated.
         """
-
         random.seed()
         c = 0
         while c < count:
             try:
-                usr = User(
+                user = User(
                     username=forgery_py.internet.user_name(with_num=True),
                     email=forgery_py.internet.email_address(),
                     first_name=forgery_py.name.first_name(),
@@ -1038,10 +1051,10 @@ class User(UserMixin, db.Document):
                     postalcode=forgery_py.address.zip_code(),
                     country=forgery_py.address.country()
                 )
-                usr.address = address
-                usr.confirmed = True
-                usr.set_password('password')
-                usr.save()
+                user.address = address
+                user.confirmed = True
+                user.set_password('password')
+                user.save()
                 c += 1
             except (ValidationError, NotUniqueError):
                 pass
