@@ -362,28 +362,113 @@ class Comment(db.Document):
 
 
 class Diary(db.Document):
+    """
+    This document implements model for interactive diary sessions which users
+    can keep as a journal and later use for reflection purposes.
+    """
     __collectionname__ = 'diary'
     id = db.SequenceField(primary_key=True)
-    body = db.StringField()
-    body_html = db.StringField()
+    title = db.StringField()
+    description = db.StringField()
+    description_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
-    author_id = db.IntField(min_value=1)
+    author_id = db.IntField(min_value=0)
     tags = db.ListField(db.StringField())
+    s_activity = db.ListField(db.StringField())
+    s_time = db.IntField(default=0)
+    o_activity = db.ListField(db.StringField())
+    o_time = db.IntField(default=0)
     # No comments for personal diary
 
     def to_json(self):
-        # TODO: implement this
-        pass
+        """
+        This function converts diary document to json object.
+        :return activity object: in JSON format
+        """
+        try:
+            return jsonify({
+                "id": self.id,
+                "title": self.title,
+                "description": self.description,
+                "description_html": self.description_html,
+                "timestamp": self.timestamp,
+                "author_id": User.objects(id=self.author_id).first().username,
+                "tags": [Tag.objects(id=i).first().text for i in self.tags],
+                "study_activity": self.s_activity,
+                "study_time": self.s_time,
+                "other_activity": self.o_activity,
+                "other_time": self.o_time
+            })
+        except Exception as el1:
+            logging.error('Unable to convert diary object={0} to JSON format. '
+                          'Error={1}'.format(self.id, el1))
+            return None
 
     @staticmethod
-    def from_json():
-        # TODO: implement this
-        pass
+    def from_json(data):
+        """
+        This function extracts diary object using data provided in JSON
+        format and returns it to the user.
+        :return activity object:
+        """
+        try:
+            diary = Diary()
+            diary.title = data.get('title') or ''
+            diary.description = data.get('description') or ''
+            diary.description_html = data.get('description_html') or ''
+            diary.author_id = data.get('author_id') or 0
+            # FIXME: All tags will be saved even if the post is not saved in db.
+            if data.get('tags') and len(data.get('tags')) > 0:
+                for tag in data.get('tags'):
+                    if Tag.objects(text=tag).count() != 0:
+                        diary.tags.append(Tag.objects(text=tag).first().id)
+                    else:
+                        t = Tag.from_json({'text': tag})
+                        if t is not None:
+                            t.save()
+                            diary.tags.append(t.id)
+            if data.get('s_activity') and len(data.get('s_activity')) > 0:
+                diary.s_activities = data.get('s_activity')
+            diary.s_time = data.get('s_time') or 0
+            if data.get('o_activity') and len(data.get('o_activity')) > 0:
+                diary.s_activities = data.get('o_activity')
+            diary.o_time = data.get('o_time') or 0
+            return diary
+        except Exception as el1:
+            logging.error('Unable to extract diary object from JSON. '
+                          'Error={0}'.format(el1))
+            return None
 
     @staticmethod
     def generate_fake(count=10):
-        # TODO: implement this
-        pass
+        """
+        This function creates and stores some fake entries in diary database
+        for testing purposes
+        :param count: Number of dummy diaries to be created.
+        """
+        random.seed()
+        c = 0
+        users = User.objects.values_list('id')
+        tags = Tag.objects.values_list('id')
+        while c < count:
+            try:
+                Activity(
+                    title=forgery_py.lorem_ipsum.word(),
+                    description=forgery_py.lorem_ipsum.sentences(quantity=2),
+                    description_html=forgery_py.lorem_ipsum.paragraphs(
+                        quantity=1, sentences_quantity=2, html=False),
+                    tags=[random.choice(tags)
+                          for _ in range(1, random.randint(1, 5))],
+                    author_id=random.choice(users),
+                    s_activity=[forgery_py.lorem_ipsum.word()
+                                for _ in range(1, 5)],
+                    s_time=random.randint(1, 5),
+                    o_activity=[forgery_py.lorem_ipsum.word()
+                                for _ in range(1, 5)],
+                    o_time=random.randint(1, 5),
+                ).save()
+            except Exception as el1:
+                pass
 
 
 class Activity(db.Document):
