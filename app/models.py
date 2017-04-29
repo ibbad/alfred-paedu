@@ -1,3 +1,4 @@
+import random
 import hashlib
 import logging
 from datetime import datetime
@@ -112,6 +113,7 @@ class Tag(db.Document):
         while c < count:
             try:
                 Tag(name=forgery_py.lorem_ipsum.word()).save()
+                count += 1
             except (ValidationError, NotUniqueError):
                 pass
             except Exception:
@@ -135,6 +137,7 @@ class Wallpost(db.Document):
             "body_html": self.body_html,
             "timestamp": self.timestamp,
             "author": User.objects(id=self.author_id).username or '',
+            "author_id": self.author_id,
             "comments": [WallpostComments.objects(id=i).first().body for i in
                          self.comments] or [],
             "tags": [Tag.objects(id=i) for i in self.tags] or []
@@ -144,9 +147,9 @@ class Wallpost(db.Document):
     def from_json(data, author_id=0):
         try:
             wp = Wallpost()
-            wp.body = data.get('body') or ''
-            wp.body = data.get('body_html') or ''
-            if wp.body == '' and wp.body_html == '':
+            wp.body = data.get('body') or None
+            wp.body = data.get('body_html') or None
+            if wp.body is None and wp.body_html is None:
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost object')
                 return
@@ -164,6 +167,7 @@ class Wallpost(db.Document):
                 logging.warning('No tags loaded from the json data for '
                                 'wallpost.')
             wp.save()
+            return wp
         except Exception as el1:
             logging.error('Unable to get wallpost object from json data. '
                           'Error={}'.format(el1))
@@ -171,31 +175,111 @@ class Wallpost(db.Document):
 
     @staticmethod
     def generate_fake(count=10):
-        # TODO: implement this
-        pass
+        """
+        Generates fake wallposts and store them in the database.
+        :param count: Number of fakes wallposts to be generated
+        :return:
+        """
+        from mongoengine import ValidationError
+        from random import seed
+        import forgery_py
 
-class WallpostComments(db.Document):
-    __collectionname__ = "WallpostComments"
+        seed()
+        c = 0
+
+        if User.objects.count() == 0:
+            logging.error('Please generate some fake users before generating '
+                          'fake wallposts.')
+            return
+        while c < count:
+            try:
+                tag_list = Tag.objects.values_list('id')
+                wp_comment_list = WallpostComments.objects.values_list('id')
+                Wallpost(
+                    body=forgery_py.lorem_ipsum.sentences(quantity=3),
+                    body_html=forgery_py.lorem_ipsum.paragraphs(
+                        quantity=1, html=True, sentences_quantity=3),
+                    author_id=random.choice(User.objects.values_list('id')),
+                    comments=[random.choice(wp_comment_list)
+                              for _ in range(0, random.randint(1, 10))],
+                    tags=[random.choice(tag_list)
+                          for _ in range(0, random.randint(1, 5))]
+                ).save()
+            except (ValidationError, NotUniqueError):
+                pass
+            except Exception:
+                pass
+
+
+class WallpostComment(db.Document):
+    __collectionname__ = "WallpostComment"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
     body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     commenter_id = db.IntField(min_value=1)
-    wallpost_id = db.IntField(min_value=1)
 
     def to_json(self):
-        # TODO: implement this
-        pass
+        return jsonify({
+            "id": self.id,
+            "body": self.body,
+            "body_html": self.body_html,
+            "commenter_id": self.commenter_id,
+            "commenter": User.objects(id=self.commenter_id).first().username
+                         or ''
+        })
 
     @staticmethod
-    def from_json():
-        # TODO: implement this
-        pass
+    def from_json(data, commenter_id=0):
+        try:
+            wpc = WallpostComment()
+            wpc.body = data.get('body') or None
+            wpc.body_html = data.get('body_html') or None
+            if wpc.body is None and wpc.body_html is None:
+                logging.error('No data in body/body_html provided for '
+                              'creating wallpost comments object')
+                return
+            if commenter_id == 0:
+                if data.get('commenter_id') is None:
+                    logging.error('No commenter specified with wallpost '
+                                  'comments.')
+                    return
+                else:
+                    wpc.commenter_id = data.get('commenter_id')
+            else:
+                wpc.commenter_id = data.get('commenter_id')
+            wpc.save()
+            return wpc
+        except Exception as el1:
+            logging.error('Unable to get wallpost comments object from json '
+                          'data. Error={}'.format(el1))
+            return
 
     @staticmethod
     def generate_fake(count=10):
-        # TODO: implement this
-        pass
+        from mongoengine import ValidationError
+        from random import seed
+        import forgery_py
+
+        seed()
+        c = 0
+
+        if User.objects.count() == 0:
+            logging.error('Please generate some fake users before generating '
+                          'fake wallpost comments.')
+            return
+        while c < count:
+            try:
+                WallpostComment(
+                    body=forgery_py.lorem_ipsum.sentences(quantity=1),
+                    body_html=forgery_py.lorem_ipsum.paragraphs(
+                        quantity=1, html=True, sentences_quantity=1),
+                    commenter_id=random.choice(User.objects.values_list('id')),
+                ).save()
+            except (ValidationError, NotUniqueError):
+                pass
+            except Exception:
+                pass
 
 
 class Diary(db.Document):
@@ -624,7 +708,7 @@ class User(UserMixin, db.Document):
     @staticmethod
     def generate_fake(fakes_required=100):
         """
-        Generates fake subscribers and store them in the database.
+        Generates fake users and store them in the database.
         :param fakes_required: Number of fakes to generate
         :return:
         """
