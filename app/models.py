@@ -183,7 +183,7 @@ class Wallpost(db.Document):
     body = db.StringField()
     body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
-    author_id = db.IntField(min_value=1)
+    author_id = db.IntField(min_value=0)
     comments = db.ListField(db.IntField(), default=[])
     tags = db.ListField(db.IntField())
 
@@ -210,11 +210,10 @@ class Wallpost(db.Document):
             return None
 
     @staticmethod
-    def from_json(data, author_id=0):
+    def from_json(data):
         """
         Extract and returns a wallpost object from json data provided by user.
         :param data: json data for the wall post.
-        :param author_id: User ID for the author of post.
         :return wallpost: object
         """
         try:
@@ -225,12 +224,9 @@ class Wallpost(db.Document):
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost object')
                 return None
-            if author_id == 0:
-                if data.get('author_id') is None:
-                    logging.error('No author provided with wallpost.')
-                    return None
-                else:
-                    wp.author_id = data.get('author_id')
+            if data.get('author_id') is None:
+                logging.error('No author provided with wallpost.')
+                wp.author_id = 0
             else:
                 wp.author_id = data.get('author_id')
             if data.get('tags') is not None and type(data.get('tags') is list):
@@ -288,7 +284,7 @@ class Comment(db.Document):
     body = db.StringField()
     body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
-    commenter_id = db.IntField(min_value=1)
+    commenter_id = db.IntField(min_value=0)
 
     def to_json(self):
         """
@@ -310,11 +306,10 @@ class Comment(db.Document):
             return None
 
     @staticmethod
-    def from_json(data, commenter_id=0):
+    def from_json(data):
         """
         Store a comment from json data to the database.
         :param data: json data for the comment
-        :param commenter_id: Id of the user who posted/registered the comment.
         :return comment: comment object
         """
         try:
@@ -325,16 +320,12 @@ class Comment(db.Document):
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost comments object')
                 return
-            if commenter_id == 0:
-                if data.get('commenter_id') is None:
-                    logging.error('No commenter specified with wallpost '
-                                  'comments.')
-                    return
-                else:
-                    c.commenter_id = data.get('commenter_id')
+            if data.get('commenter_id') is None:
+                logging.error('No commenter specified with wallpost '
+                              'comments.')
+                c.commenter_id = 0
             else:
                 c.commenter_id = data.get('commenter_id')
-            c.save()
             return c
         except Exception as el1:
             logging.error('Unable to get comments object from json '
@@ -396,6 +387,11 @@ class Diary(db.Document):
 
 
 class Activity(db.Document):
+    """
+    This document implements the model for Activities. Any user can post the
+    activities. and other people can comment on them as well as decide to
+    join to show their interest in the activities.
+    """
     __collectionname__ = 'activity'
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
@@ -404,6 +400,7 @@ class Activity(db.Document):
     tags = db.ListField(db.StringField())
     interested = db.ListField(db.IntField(min_value=1))
     going = db.ListField(db.IntField(min_value=1))
+    comments = db.ListField(db.IntField(min_value=1))
 
     def to_json(self):
         return jsonify({
@@ -422,33 +419,71 @@ class Activity(db.Document):
         pass
 
 
-class Suggestions(db.Document):
-    __collectionname__ = 'suggestions'
+class Suggestion(db.Document):
+    """
+    This document represents database model for suggestions data. Each
+    suggestion item is a query with a set of associated replies displayed to
+    user depending on the matched query.
+    """
+    __collectionname__ = 'suggestion'
     id = db.SequenceField(primary_key=True)
     query = db.StringField()
     responses = db.ListField(db.StringField())
 
     def to_json(self):
-        return {
-            "id": self.id,
-            "query": self.query,
-            "responses": self.responses
-        }
+        """
+        This function converts suggestions item to JSON representation to
+        return it to the user.
+        :return suggestions object: JSON representation.
+        """
+        try:
+            return {
+                "id": self.id,
+                "query": self.query,
+                "responses": self.responses
+            }
+        except Exception as el1:
+            logging.error('Unable to convert suggestion document to json '
+                          'format. Error{0}'.format(el1))
+            return None
 
     @staticmethod
     def from_json(json_data):
+        """
+        This function converts suggestions object's JSON representation to
+        database object and return it.
+        :param json_data: json representation of suggestion object.
+        :return suggestion: object.
+        """
         try:
-            s = Suggestions()
+            s = Suggestion()
             s.query = json_data.get('query')
             s.responses = json_data.get('responses')
+            return s
         except Exception as e:
             logging.error('Unable to load suggestion from json data. '
                           'Error={0}'.format(e))
+            return None
 
     @staticmethod
     def generate_fake(count=10):
-        # TODO: implement this
-        pass
+        """
+        This function generates a set of fake suggestion queries and their
+        responses for testing purposes.
+        :param count: Number of fake suggestion queries and reponses to develop.
+        :return:
+        """
+
+        random.seed()
+        c = 0
+        while c < count:
+            try:
+                Suggestion(query=forgery_py.lorem_ipsum.sentence(),
+                           responses=[forgery_py.lorem_ipsum.sentence() for _
+                                      in range(0, random.randint(1, 5))]).save()
+                c += 1
+            except Exception:
+                pass
 
     @staticmethod
     def load_data_from_csv(filepath):
