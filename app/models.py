@@ -1,5 +1,6 @@
 import hashlib
 import random
+import logging
 from datetime import datetime, timedelta
 from mongoengine import ValidationError
 from mongoengine.queryset import NotUniqueError
@@ -9,10 +10,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
     BadSignature, SignatureExpired
 from app import db, login_manager
-from app.IPProtocol import IPProtocol
-from helper.CONSTANTS import EMAIL_REGEX
-from helper.helper_functions import isEmail, mac2int, int2mac, ip2int, int2ip, \
-    generate_random_mac, generate_random_ip, isvalidIP
+from helper.CONSTANTS import EMAIL_REGEX, USERNAME_REGEX
+from helper.helper_functions import isEmail
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -40,6 +39,7 @@ class Permission:
     def __init__(self):
         pass
 
+
 class Address(db.EmbeddedDocument):
     """
     Address sub-document for storing address of each user.
@@ -56,7 +56,7 @@ class Address(db.EmbeddedDocument):
     # FIXME: Add required=True for respective fields.
     street = db.StringField(max_length=255)
     city = db.StringField(max_length=64)
-    postalcode = db.StringField(max_length=20)
+    postal_code = db.StringField(max_length=20)
     state = db.StringField(max_length=50)
     country = db.StringField(max_length=20)
 
@@ -64,7 +64,7 @@ class Address(db.EmbeddedDocument):
         json_address = {
             "street": self.street,
             "city": self.city,
-            "postalcode": self.postalcode,
+            "postal_code": self.postalcode,
             "state": self.state,
             "country": self.country,
         }
@@ -75,7 +75,7 @@ class Address(db.EmbeddedDocument):
         return Address(
             street=json_address.get('street') or '',
             city=json_address.get('city') or '',
-            postalcode=json_address.get('postalcode') or '',
+            postalcode=json_address.get('postal_code') or '',
             state=json_address.get('state') or '',
             country=json_address.get('country') or '',
         )
@@ -86,138 +86,144 @@ class Address(db.EmbeddedDocument):
 
 
 class Wallpost(db.Document):
-	__collectionname__ = 'wallpost'
-	id = db.SequenceField(primary_key=True)
-	body = db.StringField()
-	body_html = db.StringField()
-	timestamp = db.DateTimeField(default=datetime.utcnow())
-	author_id = db.IntField(min_value=1)
-	comments = db.ListField(db.StringField())
-	tags = db.ListField(db.StringField())
+    __collectionname__ = 'wallpost'
+    id = db.SequenceField(primary_key=True)
+    body = db.StringField()
+    body_html = db.StringField()
+    timestamp = db.DateTimeField(default=datetime.utcnow())
+    author_id = db.IntField(min_value=1)
+    comments = db.ListField(db.StringField())
+    tags = db.ListField(db.StringField())
 
-	def to_json():
-		# TODO: implement this
-		pass
+    def to_json(self):
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def from_json():
-		# TODO: implement this
-		pass
+    @staticmethod
+    def from_json():
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def generate_fake(count=10):
-		# TODO: implement this
-		pass	
+    @staticmethod
+    def generate_fake(count=10):
+        # TODO: implement this
+        pass
 
 
 class WallpostComment(db.Document):
-	__collectionname__ = 'WallpostComments'
-	id = db.SequenceField(primary_key=True)
-	body = db.StringField()
-	body_html = db.StringField()
-	timestamp = db.DateTimeField(default=datetime.utcnow())
-	commenter_id = db.IntField(min_value=1)
-	wallpost_id = db.IntField(min_value=1)
+    __collectionname__ = 'WallpostComments'
+    id = db.SequenceField(primary_key=True)
+    body = db.StringField()
+    body_html = db.StringField()
+    timestamp = db.DateTimeField(default=datetime.utcnow())
+    commenter_id = db.IntField(min_value=1)
+    wallpost_id = db.IntField(min_value=1)
 
-	def to_json():
-		# TODO: implement this
-		pass
+    def to_json(self):
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def from_json():
-		# TODO: implement this
-		pass
+    @staticmethod
+    def from_json():
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def generate_fake(count=10):
-		# TODO: implement this
-		pass	
+    @staticmethod
+    def generate_fake(count=10):
+        # TODO: implement this
+        pass
 
 
 class Diary(db.Document):
-	__collectionname__ = 'diary'
-	id = db.SequenceField(primary_key=True)
-	body = db.StringField()
-	body_html = db.StringField()
-	timestamp = db.DateTimeField(default=datetime.utcnow())
-	author_id = db.IntField(min_value=1)
-	tags = db.ListField(db.StringField())
-	# No comments for personal diary
+    __collectionname__ = 'diary'
+    id = db.SequenceField(primary_key=True)
+    body = db.StringField()
+    body_html = db.StringField()
+    timestamp = db.DateTimeField(default=datetime.utcnow())
+    author_id = db.IntField(min_value=1)
+    tags = db.ListField(db.StringField())
+    # No comments for personal diary
 
-	def to_json():
-		# TODO: implement this
-		pass
+    def to_json(self):
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def from_json():
-		# TODO: implement this
-		pass
+    @staticmethod
+    def from_json():
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def generate_fake(count=10):
-		# TODO: implement this
-		pass	
+    @staticmethod
+    def generate_fake(count=10):
+        # TODO: implement this
+        pass
 
 
 class Activity(db.Document):
-	__collectionname__ = 'activity'
-	id = db.SequenceField(primary_key=True)
-	body = db.StringField()
-	body_html = db.StringField()
-	timestamp = db.StringField()
-	tags= db.ListField(db.StringField())
-	interested = db.ListField(db.IntField(min_value=1))
-	going = db.ListField(db.IntField(min_value=1))
+    __collectionname__ = 'activity'
+    id = db.SequenceField(primary_key=True)
+    body = db.StringField()
+    body_html = db.StringField()
+    timestamp = db.StringField()
+    tags= db.ListField(db.StringField())
+    interested = db.ListField(db.IntField(min_value=1))
+    going = db.ListField(db.IntField(min_value=1))
 
-	def to_json():
-		# TODO: implement this
-		pass
+    def to_json(self):
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def from_json():
-		# TODO: implement this
-		pass
+    @staticmethod
+    def from_json():
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def generate_fake(count=10):
-		# TODO: implement this
-		pass	
+    @staticmethod
+    def generate_fake(count=10):
+        # TODO: implement this
+        pass
 
 
 class Suggestions(db.Document):
-	__collectionname__ = 'suggestions'
-	id = db.SequenceField(primary_key=True)
-	query = db.StringField()
-	responses = db.ListField(db.StringField())
+    __collectionname__ = 'suggestions'
+    id = db.SequenceField(primary_key=True)
+    query = db.StringField()
+    responses = db.ListField(db.StringField())
 
-	def to_json(self):
-		return {
-			"id": self.id,
-			"query": self.query,
-			"responses": self.responses
-		}
+    def to_json(self):
+        return {
+            "id": self.id,
+            "query": self.query,
+            "responses": self.responses
+        }
 
-	@staticmethod
-	def from_json(json_data):
-		try:
-			s= Suggestions()
-			s.query = json_data.get('query')
-			s.responses = json_data.get('responses')
-		except Exception as e:
-			logging.error('Unable to load suggestion from json data. Error={0}'.format(e))
+    @staticmethod
+    def from_json(json_data):
+        try:
+            s = Suggestions()
+            s.query = json_data.get('query')
+            s.responses = json_data.get('responses')
+        except Exception as e:
+            logging.error('Unable to load suggestion from json data. '
+                          'Error={0}'.format(e))
 
-	@staticmethod
-	def generate_fake(count=10):
-		# TODO: implement this
-		pass	
+    @staticmethod
+    def generate_fake(count=10):
+        # TODO: implement this
+        pass
 
-	@staticmethod
-	def load_data_from_csv(filepath):
-		"""
-		This function reads a .csv file containing possible queries and their possible answers.
-		"""
-		# TODO: Implement Read the csv file and load queries+answers to the database.
-		pass
+    @staticmethod
+    def load_data_from_csv(filepath):
+        """
+        This function reads a .csv file containing possible queries and their
+         possible answers.
+        :param filepath: path to csv file for lading
+        :return:
+        """
+        # TODO: Implement Read the csv file and load queries+answers to
+        # the database.
+        pass
+
 
 class User(UserMixin, db.Document):
     """
@@ -266,9 +272,9 @@ class User(UserMixin, db.Document):
         super(User, self).__init__(**kwargs)
         if self.permissions is None:
             if self.email == current_app.config['APP_ADMIN']:
-                self.permissions = Permission.admin_permissions
+                self.permissions = Permission.PERM_ADMIN
             if self.permissions is None:
-                self.permissions = Permission.user_permissions
+                self.permissions = Permission.PERM_ADMIN
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = hashlib.md5(self.email.encode('utf-8'))\
                                       .hexdigest()
@@ -511,40 +517,40 @@ class User(UserMixin, db.Document):
         self.save()
 
     def is_teacher(self):
-    	"""
-    	Checks whether given user is a teacher
-    	"""
-    	return True if self.role == 3 else False
+        """
+        Checks whether given user is a teacher
+        """
+        return True if self.role == 3 else False
 
     def is_parent(self):
-    	"""
-    	Checks whether given user is a parent
-    	"""
-    	return True if self.role == 2 else False
+        """
+        Checks whether given user is a parent
+        """
+        return True if self.role == 2 else False
 
     def is_student(self):
-    	"""
-    	Checks whether given user is a student
-    	"""
-    	return True if self.role == 1 else False
+        """
+        Checks whether given user is a student
+        """
+        return True if self.role == 1 else False
 
     def is_student_of(self, user):
-    	"""
-    	Checks whether given user is a student of another user
-    	"""
-    	return True if user.id in self.teaching else False
+        """
+        Checks whether given user is a student of another user
+        """
+        return True if user.id in self.teaching else False
 
     def is_child_of(self, user):
-    	"""
-    	Checks whether given user is a child of another user
-    	"""
-    	return True if user.id in self.parents else False
+        """
+        Checks whether given user is a child of another user
+        """
+        return True if user.id in self.parents else False
 
     def is_friend_of(self, user):
-    	"""
-    	Checks whether given user is a friend of another user
-    	"""
-    	return True if user.id in self.friends else False
+        """
+        Checks whether given user is a friend of another user
+        """
+        return True if user.id in self.friends else False
 
     def __repr__(self):
         return '<User %r>' % self.username

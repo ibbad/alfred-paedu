@@ -29,8 +29,7 @@ def register():
     """
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data,
-                         email=form.email.data)
+        user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         user.save()
         # TODO: generate and send confirmation token for the user.
@@ -52,28 +51,8 @@ def index():
     if current_user.is_anonymous:
         user_app_logger.info('Serving index page to anonymous user.')
         return render_template('index.html')
-    """
-    Show top 5 securebox and top 10 devices in the order of decreasing data
-    usage.
-    """
-    device_list = Device.objects(registered_to=current_user.id)\
-                        .order_by('-data_used')\
-                        .all()
-    user_app_logger.debug('Device list with %d devices registered to '
-                          'user %d retrieved to display on index page/ '
-                          % (len(device_list), current_user.id))
 
-    sbox_list = Securebox.objects(registered_to=current_user.id).all()
-    user_app_logger.debug('sbox list with %d devices registered to '
-                          'user %d retrieved to display on index page/ '
-                          % (len(sbox_list), current_user.id))
-
-    user_app_logger.info('Index page displayed to user %d with %d '
-                         'devices and %d secureboxes ' %
-                         (current_user.id, len(device_list), len(sbox_list)))
-    return render_template('user/user_index.html',
-                           device_list=device_list,
-                           sbox_list=sbox_list)
+    return render_template('user/user_index.html')
 
 
 @user_app.route('/profile/<username_or_email>')
@@ -102,7 +81,7 @@ def profile_page(username_or_email):
             Permission.PERM_ADMIN:
         user_app_logger.info('Displaying user %d profile page for '
                              'user %d' % (user.id, current_user.id))
-        return render_template('user/user_profile_minimal.html',
+        return render_template('user/profile_minimal.html',
                                user=user)
     # Full information is provided to the user for his own profile view.
     user_app_logger.info('displaying profile page with full information to '
@@ -156,10 +135,10 @@ def edit_profile():
         country=get_country_key(current_user.address.country) if
         current_user.address else None)
     user_app_logger.debug('edit profile form populated for user %d' %
-                            current_user.id)
+                          current_user.id)
     if form.validate_on_submit():
-        user_app_logger.debug('edit profile form submitted by user '
-                                '%d' % current_user.id)
+        user_app_logger.debug('edit profile form submitted by user %d' %
+                              current_user.id)
         current_user.first_name = form.first_name.data
         current_user.last_name = form.last_name.data
         current_user.company = form.company.data
@@ -170,7 +149,7 @@ def edit_profile():
                                   'user %d' % current_user.id)
             current_user.address = Address()
         current_user.address.street = form.street.data
-        current_user.address.postalcode = form.postalcode.data
+        current_user.address.postal_code = form.postalcode.data
         current_user.address.city = form.city.data
         current_user.address.state = form.state.data
         current_user.address.country = countries.get(form.country.data)

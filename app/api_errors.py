@@ -5,6 +5,7 @@ Modified error responses for RestAPI.
 from flask import jsonify
 from app.exceptions import ValidationError
 
+
 def not_found(message="Requested resource not found"):
     """
     Generates json response for requests for a resource not found.
@@ -68,17 +69,17 @@ def expired_token(message=None):
     return response
 
 
-def custom_error(error, message, statuscode):
+def custom_error(error, message, status_code):
     """
     Generates json response for incoming request with bad/no data.
     :param message: error message sent to the user.
     :param error: error description
-    :param statuscode: HTTP status code to be returned.
+    :param status_code: HTTP status code to be returned.
     :return: json response
     """
     response = jsonify({'error': error,
                         'message': message})
-    response.status_code = statuscode
+    response.status_code = status_code
     return response
 
 
