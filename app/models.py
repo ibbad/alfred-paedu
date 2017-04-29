@@ -6,7 +6,7 @@ import random
 import hashlib
 import logging
 import forgery_py
-from datetime import datetime
+from datetime import datetime, timedelta
 from mongoengine import ValidationError
 from mongoengine.queryset import NotUniqueError
 from flask import current_app, request, url_for, jsonify
@@ -394,29 +394,117 @@ class Activity(db.Document):
     """
     __collectionname__ = 'activity'
     id = db.SequenceField(primary_key=True)
-    body = db.StringField()
-    body_html = db.StringField()
-    timestamp = db.StringField()
+    title = db.StringField()
+    description = db.StringField()
+    description_html = db.StringField()
+    timestamp = db.DateTimeField(default=datetime.utcnow())
+    activity_time = db.DateTimeField()
     tags = db.ListField(db.StringField())
     interested = db.ListField(db.IntField(min_value=1))
     going = db.ListField(db.IntField(min_value=1))
-    comments = db.ListField(db.IntField(min_value=1))
+    comments = db.ListField(db.StringField())      # string must be Comment:json
 
     def to_json(self):
-        return jsonify({
-
-        })
-        pass
+        """
+        This function returns the json representation of activity object.
+        :return:
+        """
+        try:
+            return jsonify({
+                "id": self.id,
+                "title": self.title,
+                "description": self.description,
+                "description_html": self.description_html,
+                "timestamp": self.timestamp,
+                "activity_time": self.activity_time,
+                "tags": [Tag.objects(id=i).first().text for i in self.tags],
+                "interested": [User.objects(id=i).first().username
+                               for i in self.interested],
+                "going": [User.objects(id=i).first().username
+                               for i in self.going],
+                "comments": [Comment.objects(id=i).first().body
+                               for i in self.comments]
+            })
+        except Exception as el1:
+            logging.error('Unable to convert activity object={0} to JSON. '
+                          'Error{1}'.format(self.id, el1))
+            return None
 
     @staticmethod
-    def from_json():
-        # TODO: implement this
-        pass
+    def from_json(data):
+        """
+        This function creates and returns activity object from json data.
+        :param data: json formatted string containing activity data.
+        :return activity: object
+        """
+        try:
+            activity = Activity()
+            activity.title = data.get('title') or ''
+            activity.description = data.get('description') or ''
+            activity.description_html = data.get('description_html') or ''
+            activity.activity_time = data.get('activity_time') or ''
+            # FIXME: All tags will be saved even if the post is not saved in db.
+            if data.get('tags') and len(data.get('tags')) > 0:
+                for tag in data.get('tags'):
+                    if Tag.objects(text=tag).count() != 0:
+                        activity.tags.append(Tag.objects(text=tag).first().id)
+                    else:
+                        t = Tag.from_json({'text': tag})
+                        t.save()
+                        activity.tags.append(t.id)
+            if data.get('interested') and len(data.get('interested')) > 0:
+                activity.interested = data.get('interested')
+            if data.get('going') and len(data.get('going')) > 0:
+                activity.going = data.get('going')
+            # FIXME: All comments will be saved even if the post is not saved.
+            if data.get('comments') and len(data.get('comments')) > 0:
+                for comment in data.get('comments'):
+                    try:
+                        c = Comment.from_json(comment)
+                        c.save()
+                        activity.comments.append(c.id)
+                    except Exception:
+                        pass
+            return activity
+        except Exception as el1:
+            logging.error('Unable to extract activity object from JSON data. '
+                          'Error={0}'.format(el1))
+            return None
 
     @staticmethod
     def generate_fake(count=10):
-        # TODO: implement this
-        pass
+        """
+        This function generates and stores fake enteries for Activity
+        documents for
+        testing purposes.
+        :param count: number of fake activity entries to be generated.
+        """
+
+        random.seed()
+        c = 0
+        tags = Tag.objects.values_list('id')
+        comments = Comment.objects.values_list('id')
+        users = User.objects.values_list('id')
+        while c < count:
+            try:
+                Activity(
+                    title=forgery_py.lorem_ipsum.sentence(),
+                    description=forgery_py.lorem_ipsum.sentences(quantity=2),
+                    description_html=forgery_py.lorem_ipsum.paragraph(
+                        sentences_quantity=2, html=True),
+                    activity_time=datetime.utcnow()+timedelta(
+                        days=random.randint(1, 7)),
+                    tags=[random.choice(tags)
+                          for _ in range(1, random.randint(1, 5))],
+                    comments=[random.choice(comments)
+                              for _ in range(1, random.randint(1, 5))],
+                    interested=[random.choice(users)
+                                for _ in range(1, random.randint(1, 7))],
+                    going=[random.choice(users)
+                           for _ in range(1, random.randint(1, 5))],
+                ).save()
+            except Exception:
+                pass
 
 
 class Suggestion(db.Document):
