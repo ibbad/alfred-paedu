@@ -5,15 +5,15 @@ Module for view functions for authentication module of webapp.
 from flask import render_template, redirect, request, url_for, flash
 from flask.ext.login import login_user, logout_user, login_required, \
     current_user
-from app.auth_webapp import auth_webapp, auth_logger
-from app.auth_webapp.forms import LoginForm, ConfirmRegistrationForm, \
+from app.auth import auth_app, auth_logger
+from app.auth.forms import LoginForm, ConfirmRegistrationForm, \
     ChangePasswordForm, PasswordResetRequestForm, ChangeEmailForm, \
     PasswordResetForm, ChangeLoginForm, ChangeUsernameForm
 from app.models import User
-from app.auth_webapp.authentication import login_exempt
+from app.auth.authentication import login_exempt
 
 
-@auth_webapp.before_request
+@auth_app.before_request
 def before_request():
     """
     To be executed before any request.
@@ -34,7 +34,7 @@ def before_request():
     pass
 
 
-@auth_webapp.route('/unconfirmed')
+@auth_app.route('/unconfirmed')
 @login_required
 def unconfirmed():
     """
@@ -53,7 +53,7 @@ def unconfirmed():
         return redirect(url_for('user_app.register'))
 
 
-@auth_webapp.route('/login', methods=['GET', 'POST'])
+@auth_app.route('/login', methods=['GET', 'POST'])
 def login():
     """
     View function for user login.
@@ -73,7 +73,7 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
-@auth_webapp.route('/logout')
+@auth_app.route('/logout')
 @login_required
 def logout():
     """
@@ -86,7 +86,7 @@ def logout():
     return redirect(url_for('.login'))
 
 
-@auth_webapp.route('/confirm/<conf_token>', methods=['GET', 'POST'])
+@auth_app.route('/confirm/<conf_token>', methods=['GET', 'POST'])
 @login_exempt
 def confirm(conf_token):
     """
@@ -110,7 +110,7 @@ def confirm(conf_token):
     return render_template('auth/auth_confirm.html', form=form)
 
 
-@auth_webapp.route('/confirm')
+@auth_app.route('/confirm')
 @login_required
 def resend_confirmation():
     """
@@ -124,7 +124,7 @@ def resend_confirmation():
     return redirect(url_for('auth_webapp.confirm', conf_token=conf_token))
 
 
-@auth_webapp.route('/change_password', methods=['GET', 'POST'])
+@auth_app.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
     """
@@ -147,7 +147,7 @@ def change_password():
     return render_template('auth/change_password.html', form=form)
 
 
-@auth_webapp.route('/rqst_pwd_reset', methods=['GET', 'POST'])
+@auth_app.route('/rqst_pwd_reset', methods=['GET', 'POST'])
 def password_reset_request():
     """
     View function for requesting to generate a reset password token. Using
@@ -176,7 +176,7 @@ def password_reset_request():
     return render_template('auth/reset_password.html', form=form)
 
 
-@auth_webapp.route('/reset_password/<password_reset_token>',
+@auth_app.route('/reset_password/<password_reset_token>',
                    methods=['GET', 'POST'])
 def password_reset(password_reset_token):
     """
@@ -211,7 +211,7 @@ def password_reset(password_reset_token):
     return render_template('auth/reset_password.html', form=form)
 
 
-@auth_webapp.route('/change_login', methods=['GET', 'POST'])
+@auth_app.route('/change_login', methods=['GET', 'POST'])
 @login_required
 def change_login_request():
     """
@@ -237,7 +237,7 @@ def change_login_request():
     return render_template('auth/change_login.html', form=form)
 
 
-@auth_webapp.route('/change_login_username', methods=['GET', 'POST'])
+@auth_app.route('/change_login_username', methods=['GET', 'POST'])
 @login_required
 def change_username_request():
     """
@@ -262,7 +262,7 @@ def change_username_request():
     return render_template('auth/change_username.html', form=form)
 
 
-@auth_webapp.route('/change_login_email', methods=['GET', 'POST'])
+@auth_app.route('/change_login_email', methods=['GET', 'POST'])
 @login_required
 def change_email_request():
     """
@@ -287,7 +287,7 @@ def change_email_request():
     return render_template('auth/change_email.html', form=form)
 
 
-@auth_webapp.route('/change_login/<login_change_token>')
+@auth_app.route('/change_login/<login_change_token>')
 @login_required
 def change_login(login_change_token):
     """

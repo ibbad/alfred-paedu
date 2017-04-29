@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    Alfred - Change Login Information
+{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Change your username or email address</h1>
+</div>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

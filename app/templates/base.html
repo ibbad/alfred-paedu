@@ -86,26 +86,26 @@
                         Account <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('auth_webapp.change_password')
+                        <li><a href="{{ url_for('auth_app.change_password')
                                 }}">
                             Change Password
                         </a></li>
                         <li><a href="{{
-                                url_for('auth_webapp.change_username_request')
+                                url_for('auth_app.change_username_request')
                                 }}">
                             Change username
                         </a></li>
                         <li><a href="{{
-                                url_for('auth_webapp.change_email_request')}}">
+                                url_for('auth_app.change_email_request')}}">
                             Change email
                         </a></li>
-                        <li><a href="{{ url_for('auth_webapp.logout') }}">
+                        <li><a href="{{ url_for('auth_app.logout') }}">
                             Logout
                         </a></li>
                     </ul>
                 </li>
                 {% else %}
-                <li><a href="{{ url_for('auth_webapp.login') }}">Login</a></li>
+                <li><a href="{{ url_for('auth_app.login') }}">Login</a></li>
                 {% endif %}
             </ul>
         </div>
