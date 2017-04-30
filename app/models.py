@@ -346,13 +346,14 @@ class Comment(db.Document):
             logging.error('Please generate some fake users before generating '
                           'fake wallpost comments.')
             return
+        users = User.objects.values_list('id')
         while c < count:
             try:
                 Comment(
                     body=forgery_py.lorem_ipsum.sentences(quantity=1),
                     body_html=forgery_py.lorem_ipsum.paragraphs(
-                        quantity=1, html=True, sentences_quantity=1),
-                    commenter_id=random.choice(User.objects.values_list('id')),
+                        sentences_quantity=3, html=True, quantity=1),
+                    commenter_id=random.choice(users),
                 ).save()
                 c += 1
             except (ValidationError, NotUniqueError):
@@ -394,10 +395,10 @@ class Diary(db.Document):
                 "timestamp": self.timestamp,
                 "author_id": User.objects(id=self.author_id).first().username,
                 "tags": [Tag.objects(id=i).first().text for i in self.tags],
-                "study_activity": self.s_activity,
-                "study_time": self.s_time,
-                "other_activity": self.o_activity,
-                "other_time": self.o_time
+                "s_activity": self.s_activity,
+                "s_time": self.s_time,
+                "o_activity": self.o_activity,
+                "o_time": self.o_time
             })
         except Exception as el1:
             logging.error('Unable to convert diary object={0} to JSON format. '
@@ -452,11 +453,11 @@ class Diary(db.Document):
         tags = Tag.objects.values_list('id')
         while c < count:
             try:
-                Activity(
+                Diary(
                     title=forgery_py.lorem_ipsum.word(),
                     description=forgery_py.lorem_ipsum.sentences(quantity=2),
                     description_html=forgery_py.lorem_ipsum.paragraphs(
-                        quantity=1, sentences_quantity=2, html=False),
+                        quantity=1, sentences_quantity=2, html=True),
                     tags=[random.choice(tags)
                           for _ in range(1, random.randint(1, 5))],
                     author_id=random.choice(users),
@@ -467,9 +468,11 @@ class Diary(db.Document):
                                 for _ in range(1, 5)],
                     o_time=random.randint(1, 5),
                 ).save()
+                c += 1
             except (ValidationError, NotUniqueError):
                 pass
-            except Exception:
+            except Exception as e:
+                print(e)
                 pass
 
 
@@ -590,6 +593,7 @@ class Activity(db.Document):
                     going=[random.choice(users)
                            for _ in range(1, random.randint(1, 5))],
                 ).save()
+                c += 1
             except (ValidationError, NotUniqueError):
                 pass
             except Exception:
@@ -1048,7 +1052,7 @@ class User(UserMixin, db.Document):
                 address = Address(
                     street=forgery_py.address.street_address(),
                     city=forgery_py.address.city(),
-                    postalcode=forgery_py.address.zip_code(),
+                    postal_code=forgery_py.address.zip_code(),
                     country=forgery_py.address.country()
                 )
                 user.address = address
