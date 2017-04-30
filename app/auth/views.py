@@ -22,13 +22,13 @@ def before_request():
     if current_user.is_authenticated:
         # 3rd and 4th check to deal with infinite confirmation redirect request.
         if not current_user.confirmed \
-                and request.endpoint[:5] != 'auth_webapp.' \
+                and request.endpoint[:5] != 'auth_app.' \
                 and request.endpoint != 'static'\
                 and request.endpoint[-11:] != 'unconfirmed'\
                 and request.endpoint[-12:] != 'confirmation'\
                 and request.endpoint[-7:] != 'confirm':
             auth_logger.warning('Unconfirmed users tried to make a request.')
-            return redirect(url_for('auth_webapp.unconfirmed'))
+            return redirect(url_for('auth_app.unconfirmed'))
     # FIXME: decide what to do for a user before request. something for
     # unconfirmed user
     pass
@@ -106,7 +106,7 @@ def confirm(conf_token):
             auth_logger.warning(
                 'Invalid confirmation token used for confirmation.')
             flash('The confirmation token is either invalid or expired.')
-            return redirect(url_for('auth_webapp.login'))
+            return redirect(url_for('auth_app.login'))
     return render_template('auth/auth_confirm.html', form=form)
 
 
@@ -121,7 +121,7 @@ def resend_confirmation():
     auth_logger.info('Confirmation token successfully generated for the '
                      'user.')
     flash('Redirecting to confirmation page.')
-    return redirect(url_for('auth_webapp.confirm', conf_token=conf_token))
+    return redirect(url_for('auth_app.confirm', conf_token=conf_token))
 
 
 @auth_app.route('/change_password', methods=['GET', 'POST'])
@@ -177,7 +177,7 @@ def password_reset_request():
 
 
 @auth_app.route('/reset_password/<password_reset_token>',
-                   methods=['GET', 'POST'])
+                methods=['GET', 'POST'])
 def password_reset(password_reset_token):
     """
     View function to verify the password reset token and change the

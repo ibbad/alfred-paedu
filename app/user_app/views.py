@@ -25,7 +25,7 @@ def register():
         user_app_logger.info('Confirmation token successfully generated for '
                              'user.')
         flash('Registration successful.')
-        return redirect(url_for('auth_webapp.confirm', conf_token=conf_token))
+        return redirect(url_for('auth_app.confirm', conf_token=conf_token))
     return render_template('user/register.html', form=form)
 
 
@@ -100,7 +100,7 @@ def profile_page_id(user_id):
             Permission.PERM_ADMIN:
         user_app_logger.info('Displaying user %d profile page for '
                              'user %d' % (user.id, current_user.id))
-        return render_template('user/user_profile_minimal.html',
+        return render_template('user/profile_minimal.html',
                                user=user)
     # Full information is provided to the user for his own profile view..
     user_app_logger.info('displaying profile page with full information to '
@@ -134,10 +134,10 @@ def edit_profile():
         # If there is no address previously, create address object.
         if current_user.address is None:
             user_app_logger.debug('No address previously registered to '
-                                  'user %d' % current_user.id)
+                                  'user={0}'.format(current_user.id))
             current_user.address = Address()
         current_user.address.street = form.street.data
-        current_user.address.postal_code = form.postalcode.data
+        current_user.address.postal_code = form.postal_code.data
         current_user.address.city = form.city.data
         current_user.address.state = form.state.data
         current_user.address.country = countries.get(form.country.data)
@@ -145,16 +145,17 @@ def edit_profile():
         user_app_logger.info('user %d profile updated successfully' %
                              current_user.id)
         flash('Profile information has been updated.')
-        user_app_logger.debug('user %d being redirected to profile '
-                              'page after profile update' % current_user.id)
+        user_app_logger.debug(
+            'user={0} being redirected to profile page after profile '
+            'update'.format(current_user.id))
         return redirect(url_for('user_app.profile_page',
                                 username_or_email=current_user.username))
     # Populate the form for GET request.
     if current_user.address is not None:
         form.street.data = current_user.address.street or ''
-        form.postalcode.data = current_user.address.postalcode or ''
+        form.postal_code.data = current_user.address.postal_code or ''
         form.city.data = current_user.address.city or ''
         form.state.data = current_user.address.state or ''
-    user_app_logger.info('Edit profile form being displayed to user '
-                         '%d' % current_user.id)
+    user_app_logger.info('Edit profile form being displayed to user='
+                         '{0}'.format(current_user.id))
     return render_template('user/edit_profile.html', form=form)

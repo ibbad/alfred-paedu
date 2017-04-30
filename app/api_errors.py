@@ -96,9 +96,8 @@ def validation_error(message, statuscode=400):
     response.status_code = statuscode
     return response
 
-from app.user_api_v1_0 import api
+from app.user_api_v1_0 import user_api
 
-
-@api.errorhandler(ValidationError)
+@user_api.errorhandler(ValidationError)
 def validation_error(e):
     return bad_request(e.args[0])

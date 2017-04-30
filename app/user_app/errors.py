@@ -13,9 +13,9 @@ def forbidden(e):
             not request.accept_mimetypes.accept_html:
         response = jsonify({'error': 'forbidden'})
         response.status_code = 403
-        response.message = e.message
+        response.message = e
         return response
-    return render_template('errors/403.html', message=e.message), 403
+    return render_template('errors/403.html', message=e), 403
 
 
 @user_app.app_errorhandler(404)
@@ -24,9 +24,9 @@ def page_not_found(e):
             not request.accept_mimetypes.accept_html:
         response = jsonify({'error': 'page not found'})
         response.status_code = 404
-        response.message = e.message
+        response.message = e
         return response
-    return render_template('errors/404.html', message=e.message), 404
+    return render_template('errors/404.html', message=e), 404
 
 
 @user_app.app_errorhandler(500)
@@ -35,6 +35,6 @@ def internal_server_error(e):
             not request.accept_mimetypes.accept_html:
         response = jsonify({'error': 'internal server error'})
         response.status_code = 400
-        response.message = e.message
+        response.message = e
         return response
-    return render_template('errors/500.html', message=e.message), 500
+    return render_template('errors/500.html', message=e), 500

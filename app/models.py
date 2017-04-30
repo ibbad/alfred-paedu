@@ -15,7 +15,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
     BadSignature, SignatureExpired
 from app import db, login_manager
-from helper.CONSTANTS import EMAIL_REGEX, USERNAME_REGEX
+from helper.regex_strings import EMAIL, USERNAME
 from helper.helper_functions import isEmail
 
 
@@ -60,10 +60,10 @@ class Address(db.EmbeddedDocument):
 
     # FIXME: Add required=True for respective fields.
     street = db.StringField(max_length=255)
-    city = db.StringField(max_length=64)
+    city = db.StringField(max_length=255)
     postal_code = db.StringField(max_length=20)
     state = db.StringField(max_length=50)
-    country = db.StringField(max_length=20)
+    country = db.StringField(max_length=128)
 
     def to_json(self):
         """
@@ -703,9 +703,9 @@ class User(UserMixin, db.Document):
     __collectionname__ = 'user'
     id = db.SequenceField(primary_key=True)
     # FIXME: ensure uniqueness of email and username in business logic.
-    email = db.EmailField(regex=EMAIL_REGEX, max_length=64, required=True,
+    email = db.EmailField(regex=EMAIL, max_length=64, required=True,
                           unique=True)
-    username = db.StringField(regex=USERNAME_REGEX, max_length=64,
+    username = db.StringField(regex=USERNAME, max_length=64,
                               required=True, unique=True)
     password_hash = db.StringField(max_length=128)
     confirmed = db.BooleanField(default=False)

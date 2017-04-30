@@ -4,7 +4,7 @@ Module with helping functions to be used in the project at later stages.
 import random
 import string
 import re
-from helper.CONSTANTS import EMAIL_REGEX
+from helper.regex_strings import EMAIL
 
 
 def id_generator(length=8):

@@ -17,7 +17,7 @@ csrf = CSRFProtect()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
-login_manager.login_view = 'auth_webapp.login'
+login_manager.login_view = 'auth_app.login'
 
 # if it takes more than 10 seconds to setup application, raise an alarm
 # Indicates failure to connect to MongoDB while testing.
@@ -51,10 +51,14 @@ def create_app(config_name):
     from app.webapp import webapp as webapp_blueprint
     app.register_blueprint(webapp_blueprint)
 
+    # Register auth_app blueprint
+    from app.auth import auth_app as auth_app_blueprint
+    app.register_blueprint(auth_app_blueprint,
+                           url_prefix='/auth')
+
     # Register user_app blueprint
     from app.user_app import user_app as user_app_blueprint
     app.register_blueprint(user_app_blueprint,
                            url_prefix='/user')
-    
 
     return app
