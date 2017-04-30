@@ -5,7 +5,8 @@ import os
 import sys
 import logging
 from app import create_app, db
-from app.models import User, Permission
+from app.models import User, Permission, Tag, Post, Comment, Diary, Activity,\
+    Suggestion
 from flask_script import Manager, Shell
 
 logging.basicConfig(level=logging.DEBUG,
@@ -23,7 +24,9 @@ def make_shell_context():
     Make context for Shell.
     :return: Application models, database and application object.
     """
-    return dict(app=app, User=User, Permission=Permission, db=db)
+    return dict(app=app, db=db, User=User, Permission=Permission, Tag=Tag,
+                Post=Post, Comment=Comment, Diary=Diary, Activity=Activity,
+                Suggestion=Suggestion)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 

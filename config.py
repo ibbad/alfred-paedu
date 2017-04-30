@@ -5,12 +5,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 from helper.helper_functions import generate_secret_key
 
+
 class Config:
     """
     Key configurations parameters.
     """
-    with open("config.json") as config_file:
-        settings = json.load(config_file)
     SECRET_KEY = os.environ.get('SECRET_KEY') or generate_secret_key()
     SSL_DISABLE = False
     APP_ADMIN = 'admin@example.com'

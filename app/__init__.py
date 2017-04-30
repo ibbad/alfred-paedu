@@ -2,18 +2,18 @@
 Initialize the blueprint for Application api v1.0
 """
 from flask import Flask
-from flask.ext.mongoengine import MongoEngine
-from flask.ext.login import LoginManager
-from flask.ext.moment import Moment
-from flask.ext.bootstrap import Bootstrap
-from flask_wtf.csrf import CsrfProtect
+from flask_mongoengine import MongoEngine
+from flask_login import LoginManager
+from flask_moment import Moment
+from flask_bootstrap import Bootstrap
+from flask_wtf import CSRFProtect
 from config import config
 from app.decorators import timeout
 
 db = MongoEngine()
 moment = Moment()
 bootstrap = Bootstrap()
-csrf = CsrfProtect()
+csrf = CSRFProtect()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -51,9 +51,9 @@ def create_app(config_name):
     from app.webapp import webapp as webapp_blueprint
     app.register_blueprint(webapp_blueprint)
 
-    # Register subscriber_webapp blueprint
-    from app.user_webapp import user_webapp as user_webapp_blueprint
-    app.register_blueprint(user_webapp_blueprint,
+    # Register user_app blueprint
+    from app.user_app import user_app as user_app_blueprint
+    app.register_blueprint(user_app_blueprint,
                            url_prefix='/user')
     
 

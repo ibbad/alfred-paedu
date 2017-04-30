@@ -1,4 +1,8 @@
-from flask.ext.wtf import Form
+"""
+Templates for forms to be used in user app module
+"""
+
+from flask_wtf import Form
 from wtforms import StringField, BooleanField, SubmitField, SelectField, \
     PasswordField
 from wtforms.validators import InputRequired, Length, Email, Regexp, EqualTo

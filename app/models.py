@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from mongoengine import ValidationError
 from mongoengine.queryset import NotUniqueError
 from flask import current_app, request, url_for, jsonify
-from flask.ext.login import UserMixin, AnonymousUserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
     BadSignature, SignatureExpired
@@ -173,12 +173,12 @@ class Tag(db.Document):
                 pass
 
 
-class Wallpost(db.Document):
+class Post(db.Document):
     """
-    This blueprint represents a wallpost object. Wallposts are written by
-    users and other users can comment on these wallposts.
+    This blueprint represents a post object. Posts are written by
+    users and other users can comment on these Posts.
     """
-    __collectionname__ = "Wallpost"
+    __collectionname__ = "Post"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
     body_html = db.StringField()
@@ -189,8 +189,8 @@ class Wallpost(db.Document):
 
     def to_json(self):
         """
-        Convert wallpost object to JSON formatted string.
-        :return wallpost: JSON object.
+        Convert post object to JSON formatted string.
+        :return post: JSON object.
         """
         try:
             return jsonify({
@@ -205,27 +205,27 @@ class Wallpost(db.Document):
                 "tags": [Tag.objects(id=i) for i in self.tags] or []
             })
         except Exception as el1:
-            logging.error('Unable to convert wallpost object to json. '
+            logging.error('Unable to convert post object to json. '
                           'Error={0}'.format(el1))
             return None
 
     @staticmethod
     def from_json(data):
         """
-        Extract and returns a wallpost object from json data provided by user.
+        Extract and returns a post object from json data provided by user.
         :param data: json data for the wall post.
-        :return wallpost: object
+        :return post: object
         """
         try:
-            wp = Wallpost()
+            wp = Post()
             wp.body = data.get('body') or None
             wp.body = data.get('body_html') or None
             if wp.body is None and wp.body_html is None:
                 logging.error('No data in body/body_html provided for '
-                              'creating wallpost object')
+                              'creating post object')
                 return None
             if data.get('author_id') is None:
-                logging.error('No author provided with wallpost.')
+                logging.error('No author provided with post.')
                 wp.author_id = 0
             else:
                 wp.author_id = data.get('author_id')
@@ -233,17 +233,17 @@ class Wallpost(db.Document):
                 [wp.tags.append(tag) for tag in data.get('tags')]
             else:
                 logging.warning('No tags loaded from the json data for '
-                                'wallpost.')
+                                'post.')
             return wp
         except Exception as el1:
-            logging.error('Unable to get wallpost object from json data. '
+            logging.error('Unable to get post object from json data. '
                           'Error={}'.format(el1))
             return None
 
     @staticmethod
     def generate_fake(count=10):
         """
-        Generates fake wall posts and store them in the database.
+        Generates fake post and store them in the database.
         :param count: Number of fakes wall posts to be generated.
         """
         random.seed()
@@ -251,13 +251,13 @@ class Wallpost(db.Document):
 
         if User.objects.count() == 0:
             logging.error('Please generate some fake users before generating '
-                          'fake wallposts.')
+                          'fake posts.')
             return
         while c < count:
             try:
                 tag_list = Tag.objects.values_list('id')
                 wp_comment_list = Comment.objects.values_list('id')
-                Wallpost(
+                Post(
                     body=forgery_py.lorem_ipsum.sentences(quantity=3),
                     body_html=forgery_py.lorem_ipsum.paragraphs(
                         quantity=1, html=True, sentences_quantity=3),

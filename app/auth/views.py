@@ -3,7 +3,7 @@ Module for view functions for authentication module of webapp.
 """
 
 from flask import render_template, redirect, request, url_for, flash
-from flask.ext.login import login_user, logout_user, login_required, \
+from flask_login import login_user, logout_user, login_required, \
     current_user
 from app.auth import auth_app, auth_logger
 from app.auth.forms import LoginForm, ConfirmRegistrationForm, \

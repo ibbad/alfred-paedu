@@ -1,24 +1,12 @@
 """
 View functions for user webapp v1.0
 """
-from flask import render_template, redirect, url_for, abort, flash, request, \
-    current_app
-from flask.ext.login import login_required, current_user
+from flask import render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
 from app.user_app import user_app, user_app_logger
 from app.user_app.forms import EditProfileForm, RegistrationForm
 from app.models import User, Address, Permission
 from helper.countries import countries, get_country_key
-
-
-@user_app.route('/shutdown')
-def server_shutdown():
-    if not current_app.testing:
-        abort(404)
-    shutdown = request.environ.get('werkzeug.server.shutdown')
-    if not shutdown:
-        abort(500)
-    shutdown()
-    return 'Shutting down...'
 
 
 @user_app.route('/register', methods=['GET', 'POST'])
@@ -92,7 +80,7 @@ def profile_page(username_or_email):
 @user_app.route('/profile/<int:user_id>')
 def profile_page_id(user_id):
     """
-    This view function takes the IDof the user and returns the profile
+    This view function takes the ID of the user and returns the profile
     page of the respective user.
     :param user_id: ID of the user
     whose profile page is accessed.

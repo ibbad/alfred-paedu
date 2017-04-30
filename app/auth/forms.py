@@ -2,7 +2,7 @@
 This module describes the forms used in authentication web application.
 """
 
-from flask.ext.wtf import Form
+from flask_wtf import Form
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import InputRequired, Email, Length, Regexp, EqualTo
 from app.common.custom_validators import check_credential_duplication, \
