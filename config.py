@@ -14,9 +14,9 @@ class Config:
     SSL_DISABLE = False
     APP_ADMIN = 'admin@example.com'
     SEND_FILE_MAX_AGE_DEFAULT = 0       # Disable browser cache
- #   WTF_CSRF_ENABLED = True
-
-
+    #WTF_CSRF_ENABLED = True
+    POSTS_PER_PAGE = 10
+    COMMENTS_PER_PAGE = 15
 
     @staticmethod
     def init_app(app):

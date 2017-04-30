@@ -181,7 +181,6 @@ class Post(db.Document):
     __collectionname__ = "Post"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
-    body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=0)
     comments = db.ListField(db.IntField(), default=[])
@@ -196,7 +195,6 @@ class Post(db.Document):
             return jsonify({
                 "id": self.id,
                 "body": self.body,
-                "body_html": self.body_html,
                 "timestamp": self.timestamp,
                 "author": User.objects(id=self.author_id).username or '',
                 "author_id": self.author_id,
@@ -217,24 +215,23 @@ class Post(db.Document):
         :return post: object
         """
         try:
-            wp = Post()
-            wp.body = data.get('body') or None
-            wp.body = data.get('body_html') or None
-            if wp.body is None and wp.body_html is None:
+            p = Post()
+            p.body = data.get('body') or None
+            if p.body is None:
                 logging.error('No data in body/body_html provided for '
                               'creating post object')
                 return None
             if data.get('author_id') is None:
                 logging.error('No author provided with post.')
-                wp.author_id = 0
+                p.author_id = 0
             else:
-                wp.author_id = data.get('author_id')
+                p.author_id = data.get('author_id')
             if data.get('tags') is not None and type(data.get('tags') is list):
-                [wp.tags.append(tag) for tag in data.get('tags')]
+                [p.tags.append(tag) for tag in data.get('tags')]
             else:
                 logging.warning('No tags loaded from the json data for '
                                 'post.')
-            return wp
+            return p
         except Exception as el1:
             logging.error('Unable to get post object from json data. '
                           'Error={}'.format(el1))
@@ -256,13 +253,11 @@ class Post(db.Document):
         while c < count:
             try:
                 tag_list = Tag.objects.values_list('id')
-                wp_comment_list = Comment.objects.values_list('id')
+                comment_list = Comment.objects.values_list('id')
                 Post(
                     body=forgery_py.lorem_ipsum.sentences(quantity=3),
-                    body_html=forgery_py.lorem_ipsum.paragraphs(
-                        quantity=1, html=True, sentences_quantity=3),
                     author_id=random.choice(User.objects.values_list('id')),
-                    comments=[random.choice(wp_comment_list)
+                    comments=[random.choice(comment_list)
                               for _ in range(0, random.randint(1, 10))],
                     tags=[random.choice(tag_list)
                           for _ in range(0, random.randint(1, 5))]
@@ -282,9 +277,11 @@ class Comment(db.Document):
     __collectionname__ = "Comment"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
-    body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     commenter_id = db.IntField(min_value=0)
+    post_id = db.IntField()
+    # type of comment = 1:post, 2:activity
+    c_type = db.IntField(default=1)
 
     def to_json(self):
         """
@@ -295,10 +292,10 @@ class Comment(db.Document):
             return jsonify({
                 "id": self.id,
                 "body": self.body,
-                "body_html": self.body_html,
                 "commenter_id": self.commenter_id,
                 "commenter": User.objects(id=self.commenter_id).first().username
-                             or ''
+                             or '',
+                "post_id": self.post_id
             })
         except Exception as el1:
             logging.error('Unable to convert comment object to json. Error={'
@@ -315,8 +312,7 @@ class Comment(db.Document):
         try:
             c = Comment()
             c.body = data.get('body') or None
-            c.body_html = data.get('body_html') or None
-            if c.body is None and c.body_html is None:
+            if c.body is None:
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost comments object')
                 return
@@ -326,6 +322,7 @@ class Comment(db.Document):
                 c.commenter_id = 0
             else:
                 c.commenter_id = data.get('commenter_id')
+            c.type = 2 if data.get('type').lower() == 'activity' else 1
             return c
         except Exception as el1:
             logging.error('Unable to get comments object from json '
@@ -351,9 +348,8 @@ class Comment(db.Document):
             try:
                 Comment(
                     body=forgery_py.lorem_ipsum.sentences(quantity=1),
-                    body_html=forgery_py.lorem_ipsum.paragraphs(
-                        sentences_quantity=3, html=True, quantity=1),
                     commenter_id=random.choice(users),
+                    c_type=random.choice([1, 2])
                 ).save()
                 c += 1
             except (ValidationError, NotUniqueError):

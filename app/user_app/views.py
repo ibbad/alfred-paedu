@@ -91,21 +91,8 @@ def profile_page_id(user_id):
         user_app_logger.error('User %d requested profile page for non'
                               ' existing user %d' % (current_user.id, user_id))
         return render_template('errors/404.html')
-    """
-    If the logged in user is trying to access some other user's
-    profile, minimal information is presented.
-    """
-    if user.id != current_user.id and \
-        User.objects(id=current_user.id).first().permissions != \
-            Permission.PERM_ADMIN:
-        user_app_logger.info('Displaying user %d profile page for '
-                             'user %d' % (user.id, current_user.id))
-        return render_template('user/profile_minimal.html',
-                               user=user)
-    # Full information is provided to the user for his own profile view..
-    user_app_logger.info('displaying profile page with full information to '
-                         'user %d' % user.id)
-    return render_template('user/profile.html', user=user)
+    return redirect(url_for('user_app.profile_page',
+                            username_or_email=user.username))
 
 
 @user_app.route('/edit-profile', methods=['GET', 'POST'])

@@ -1,3 +1,6 @@
+"""
+Initialize user app module which contains views to handle user functions.
+"""
 from flask import Blueprint
 from app.common.logging_module import setup_logging
 

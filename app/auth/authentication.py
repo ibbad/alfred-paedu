@@ -3,7 +3,7 @@ Authentication module for Authentication RestAPI/ Webapp.
 """
 
 from flask import g, request, current_app
-from flask.ext.httpauth import HTTPBasicAuth
+from flask_httpauth import HTTPBasicAuth
 from app.models import User, AnonymousUser
 from app.user_api_v1_0 import user_api
 from app.api_errors import unauthorized

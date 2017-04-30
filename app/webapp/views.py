@@ -31,33 +31,33 @@ object to the template.
 
 
 @webapp.add_app_template_global
-def get_registrant(sub_id):
+def get_fullname_from_id(user_id):
     """
     Returns the first name and last name of the subscriber whose id is provided.
-    :param sub_id: ID of the subscriber whose first and last name is required.
+    :param user_id: ID of the subscriber whose first and last name is required.
     :return (firstname, lastname): String tuple
     """
-    sub = Subscriber.objects(id=sub_id).first()
-    if sub is not None:
-        webapp_logger.debug('Returning subscriber %d name' % sub.id)
-        return sub.first_name, sub.last_name
+    user = User.objects(id=user_id).first()
+    if user is not None:
+        webapp_logger.debug('Returning subscriber %d name' % user.id)
+        return user.first_name, user.last_name
     else:
-        webapp_logger.warning('Subscriber %d not found in database.' % sub_id)
+        webapp_logger.warning('Subscriber %d not found in database.' % user_id)
         return ''
 
 
 @webapp.add_app_template_global
-def get_registrant_username(sub_id):
+def get_username_from_id(user_id):
     """
     Returns the username of the subscriber whose id is provided.
-    :param sub_id: ID of the subscriber whose first and last name is required.
+    :param user_id: ID of the subscriber whose first and last name is required.
     :return username: String.
     """
-    sub = Subscriber.objects(id=sub_id).first()
-    if sub is not None:
-        webapp_logger.debug('Returning subscriber %d username to jinja2 '
-                            'template.' % sub_id)
-        return sub.username
+    user = User.objects(id=user_id).first()
+    if user_id is not None:
+        webapp_logger.debug('Returning user %d username to jinja2 '
+                            'template.' % user.id)
+        return user.username
     else:
-        webapp_logger.warning('Subscriber %d not found in database.' % sub_id)
+        webapp_logger.warning('User %d not found in database.' % user_id)
         return ''
