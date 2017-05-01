@@ -17,6 +17,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
 from app import db, login_manager
 from helper.regex_strings import EMAIL, USERNAME
 from helper.helper_functions import isEmail
+from config import Config
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -277,11 +278,13 @@ class Comment(db.Document):
     __collectionname__ = "Comment"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
+    body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     commenter_id = db.IntField(min_value=0)
     post_id = db.IntField()
+    disabled = db.BooleanField(default=False)
     # type of comment = 1:post, 2:activity
-    c_type = db.IntField(default=1)
+    c_type = db.IntField(default=Config.COMMENT_TYPE['POST'])
 
     def to_json(self):
         """
@@ -312,13 +315,13 @@ class Comment(db.Document):
         try:
             c = Comment()
             c.body = data.get('body') or None
-            if c.body is None:
+            c.body_html = data.get('body_html') or None
+            if c.body is None and c.body_html is not None:
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost comments object')
-                return
+                raise ValidationError('Comments must have a body')
             if data.get('commenter_id') is None:
-                logging.error('No commenter specified with wallpost '
-                              'comments.')
+                logging.warning('No commenter specified with post comments.')
                 c.commenter_id = 0
             else:
                 c.commenter_id = data.get('commenter_id')
@@ -348,6 +351,8 @@ class Comment(db.Document):
             try:
                 Comment(
                     body=forgery_py.lorem_ipsum.sentences(quantity=1),
+                    body_html=forgery_py.lorem_ipsum.paragraph(
+                        html=True, sentences_quantity=2),
                     commenter_id=random.choice(users),
                     c_type=random.choice([1, 2])
                 ).save()

@@ -88,8 +88,29 @@ def post_page(id):
     if page == -1:
         page = (len(post.comments) - 1) // current_app.config[
             'COMMENTS_PER_PAGE'] + 1
-    qs = Comment.objects.filter(id in post.comments)
-    pagination = qs.paginate(page,
-                             per_page=current_app.config['POSTS_PER_PAGE'],
-                             error_out=False)
-    posts = pagination.items
+    qs = Comment.objects(
+        c_type=current_app.config["COMMENT_TYPE"]["POST"],
+        post_id=post.id).all()
+    pagination = qs.paginate(
+        page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+    comments = pagination.items
+    return render_template('post.html', posts=[post], form=form,
+                           comments=comments, pagination=pagination)
+
+
+@post_app.route('/moderate/enable/<int:id>')
+def moderate_enable(id):
+    comment = Comment.objects.first_or_404(id)
+    comment.disabled = False
+    comment.save()
+    return redirect(url_for('.moderate',
+                            page=request.args.get('page', 1, type=int)))
+
+
+@post_app.route('/moderate/disable/<int:id>')
+def moderate_disable(id):
+    comment = Comment.objects.get_or_404(id)
+    comment.disabled = True
+    comment.save()
+    return redirect(url_for('.moderate',
+                            page=request.args.get('page', 1, type=int)))
