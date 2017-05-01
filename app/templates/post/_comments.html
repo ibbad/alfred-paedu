@@ -2,19 +2,14 @@
     {% for comment in comments %}
     <li class="comment">
         <div class="comment-thumbnail">
-            <a
-                    href="{{ url_for('user_app.user',
-                    username=comment.commenter_id) }}">
-                <!--
-                <img class="img-rounded profile-thumbnail"
-                      src="{{ comment.author.gravatar(size=40) }}">
-                      -->
+            <a href="{{ url_for('user_app.profile_page_id',
+            user_id=comment.commenter_id) }}">
             </a>
         </div>
         <div class="comment-content">
             <div class="comment-date">{{ moment(comment.timestamp).fromNow() }}</div>
             <div class="comment-author"><a
-                    href="{{ url_for('user_app.user', username=comment.commenter_id) }}">{{ comment.author.username }}</a></div>
+                    href="{{ url_for('user_app.profile_page_id', user_id=comment.commenter_id) }}">{{ get_username_from_id(comment.commenter_id) }}</a></div>
             <div class="comment-body">
                 {% if comment.disabled %}
                 <p><i>This comment has been disabled by a moderator.</i></p>

@@ -5,10 +5,6 @@
     Alfred
 {% endblock %}
 
-{% block scripts %}
-{{ super() }}
-{% endblock %}
-
 {% block page_content %}
 <div class="page-header">
     <h1>
@@ -16,4 +12,9 @@
     </h1>
 </div>
     <p>Alfred Says Welcome :) </p>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}

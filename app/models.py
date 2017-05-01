@@ -242,25 +242,23 @@ class Post(db.Document):
     def generate_fake(count=10):
         """
         Generates fake post and store them in the database.
-        :param count: Number of fakes wall posts to be generated.
+        :param count: Number of fakes wall post_app to be generated.
         """
         random.seed()
         c = 0
 
         if User.objects.count() == 0:
             logging.error('Please generate some fake users before generating '
-                          'fake posts.')
+                          'fake post_app.')
             return
+        users = User.objects.values_list('id')
+        tags = Tag.objects.values_list('id')
         while c < count:
             try:
-                tag_list = Tag.objects.values_list('id')
-                comment_list = Comment.objects.values_list('id')
                 Post(
                     body=forgery_py.lorem_ipsum.sentences(quantity=3),
-                    author_id=random.choice(User.objects.values_list('id')),
-                    comments=[random.choice(comment_list)
-                              for _ in range(0, random.randint(1, 10))],
-                    tags=[random.choice(tag_list)
+                    author_id=random.choice(users),
+                    tags=[random.choice(tags)
                           for _ in range(0, random.randint(1, 5))]
                 ).save()
                 c += 1
@@ -347,6 +345,7 @@ class Comment(db.Document):
                           'fake wallpost comments.')
             return
         users = User.objects.values_list('id')
+        posts = Post.objects.values_list('id')
         while c < count:
             try:
                 Comment(
@@ -354,6 +353,7 @@ class Comment(db.Document):
                     body_html=forgery_py.lorem_ipsum.paragraph(
                         html=True, sentences_quantity=2),
                     commenter_id=random.choice(users),
+                    post_id=random.choice(posts),
                     c_type=random.choice([1, 2])
                 ).save()
                 c += 1

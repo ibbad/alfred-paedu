@@ -7,6 +7,7 @@ from flask_login import LoginManager
 from flask_moment import Moment
 from flask_bootstrap import Bootstrap
 from flask_wtf import CSRFProtect
+from flask_pagedown import PageDown
 from config import config
 from app.decorators import timeout
 
@@ -14,6 +15,7 @@ db = MongoEngine()
 moment = Moment()
 bootstrap = Bootstrap()
 csrf = CSRFProtect()
+pagedown = PageDown()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -47,6 +49,7 @@ def create_app(config_name):
     login_manager.init_app(app, add_context_processor=True)
     bootstrap.init_app(app)
     csrf.init_app(app)
+    pagedown.init_app(app)
 
     from app.webapp import webapp as webapp_blueprint
     app.register_blueprint(webapp_blueprint)
@@ -60,5 +63,10 @@ def create_app(config_name):
     from app.user_app import user_app as user_app_blueprint
     app.register_blueprint(user_app_blueprint,
                            url_prefix='/user')
+
+    # Register post_app blueprint
+    from app.post_app import post_app as post_app_blueprint
+    app.register_blueprint(post_app_blueprint,
+                           url_prefix='/post')
 
     return app

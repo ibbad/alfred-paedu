@@ -4,7 +4,7 @@ Module containing generic functions for Jinja2 Template.
 
 from flask import render_template, current_app, abort, request
 from app.webapp import webapp, webapp_logger
-from app.models import User
+from app.models import User, Comment
 
 
 @webapp.route('/')
@@ -61,3 +61,14 @@ def get_username_from_id(user_id):
     else:
         webapp_logger.warning('User %d not found in database.' % user_id)
         return ''
+
+
+@webapp.add_app_template_global
+def get_post_comment_count(post_id):
+    """
+    Returns the count for comments on given post.
+    :param user_id: ID of the subscriber whose first and last name is required.
+    :return username: String.
+    """
+    return Comment.objects(c_type=current_app.config["COMMENT_TYPE"][
+        "POST"], post_id=post_id).count()
