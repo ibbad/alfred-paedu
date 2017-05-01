@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}
+Alfred - Suggestions
+{% endblock %}
+
+{% block page_content %}
+<div class="comment-form">
+    {{ wtf.quick_form(form) }}
+</div>
+
+<!-- Custom message -->
+{% if message %}
+</div>
+    {{message}}
+</div>
+{% endif %}
+
+
+<!-- Responses -->
+{% if responses %}
+<div>
+<h2> Responses </h2>
+<ol>
+    {% for r in responses %}
+    <li class="comment-body">{{ r }}</li>
+    {% endfor %}
+</ol>
+{% else %}
+<p>
+    Try another query.
+</p>
+</div>
+{% endif %}
+
+
+
+{% endblock %}

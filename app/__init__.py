@@ -69,4 +69,9 @@ def create_app(config_name):
     app.register_blueprint(post_app_blueprint,
                            url_prefix='/post')
 
+    # Register Suggestion app blueprint
+    from app.suggestion_app import sugg_app as sugg_app_blueprint
+    app.register_blueprint(sugg_app_blueprint,
+                           url_prefix='/suggestion')
+
     return app

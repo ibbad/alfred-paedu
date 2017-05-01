@@ -2,14 +2,14 @@
 This module describes the forms used in authentication web application.
 """
 
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import InputRequired, Email, Length, Regexp, EqualTo
 from app.common.custom_validators import check_credential_duplication, \
     check_username_duplication, check_email_duplication
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     """
     User form for login using email or username.
     """
@@ -20,7 +20,7 @@ class LoginForm(Form):
     submit = SubmitField('Login')
 
 
-class ChangePasswordForm(Form):
+class ChangePasswordForm(FlaskForm):
     """
     Web form for changing user password when user is logged in.
     """
@@ -35,7 +35,7 @@ class ChangePasswordForm(Form):
     submit = SubmitField('Update Password')
 
 
-class PasswordResetRequestForm(Form):
+class PasswordResetRequestForm(FlaskForm):
     """
     Web form for making a request for (forgotten or stolen etc.) password reset
     by the user.
@@ -46,7 +46,7 @@ class PasswordResetRequestForm(Form):
     submit = SubmitField('Reset Password')
 
 
-class PasswordResetForm(Form):
+class PasswordResetForm(FlaskForm):
     """
     Web form for resetting password for user.
     """
@@ -63,7 +63,7 @@ class PasswordResetForm(Form):
     submit = SubmitField('Reset Password')
 
 
-class PasswordChangeForm(Form):
+class PasswordChangeForm(FlaskForm):
     """
     Web form for changing password for user without using username/email.
     when user is not logged and uses a token to access this page.
@@ -77,7 +77,7 @@ class PasswordChangeForm(Form):
     submit = SubmitField('Reset Password')
 
 
-class ChangeUsernameForm(Form):
+class ChangeUsernameForm(FlaskForm):
     """
     Web form for changing user login information i.e. username.
     """
@@ -91,7 +91,7 @@ class ChangeUsernameForm(Form):
     submit = SubmitField('Update')
 
 
-class ChangeEmailForm(Form):
+class ChangeEmailForm(FlaskForm):
     """
     Web form for changing user login information i.e. email.
     """
@@ -106,7 +106,7 @@ class ChangeEmailForm(Form):
     #         raise ValidationError('Email already registered.')
 
 
-class ChangeLoginForm(Form):
+class ChangeLoginForm(FlaskForm):
     """
     Web form for changing user login information i.e. email or username.
     """
@@ -117,7 +117,7 @@ class ChangeLoginForm(Form):
     submit = SubmitField('Update login information')
 
 
-class ConfirmationForm(Form):
+class ConfirmationForm(FlaskForm):
     """
     Web form for confirmation of user.
     """
@@ -127,7 +127,7 @@ class ConfirmationForm(Form):
     submit = SubmitField('Confirm')
 
 
-class ConfirmRegistrationForm(Form):
+class ConfirmRegistrationForm(FlaskForm):
     """
     Web form for confirmation of user registration.
     """

@@ -121,13 +121,10 @@ def post_page(id):
         flash('Your comment has been posted.')
         return redirect(url_for('.post_page', id=post.id, page=-1))
     page = request.args.get('page', 1, type=int)
-
-    print('*' * 80)
-    print(page)
-    print('*' * 80)
     if page == -1:
-        page = (Comment.objects(c_type=current_app.config["COMMENT_TYPE"][
-            "POST"], post_id=post.id).count() - 1) // \
+        page = (Comment.objects(
+            c_type=current_app.config["COMMENT_TYPE"]["POST"],
+            post_id=post.id).count() - 1) // \
                current_app.config['COMMENTS_PER_PAGE'] + 1
     qs = Comment.objects(
         c_type=current_app.config["COMMENT_TYPE"]["POST"],
