@@ -57,7 +57,7 @@
                 <li>
                     <a href="{{ url_for('user_app.index')}}">Home</a>
                 </li>
-                <!-- Profile -->
+                <!-- Profile section -->
                 {% if current_user.is_authenticated %}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -78,7 +78,7 @@
                         </li>
                     </ul>
                 </li>
-                <!-- Posts application -->
+                <!-- Posts section -->
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         Posts
@@ -97,11 +97,30 @@
                         </li>
                     </ul>
                 </li>
-                <!-- Suggestion box -->
+                <!-- Suggestion section -->
                 <li>
                     <a href="{{ url_for('sugg_app.index')}}">
                         Suggestions
                     </a>
+                </li>
+                <!-- Diary section -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Diary
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="{{url_for('diary_app.index')}}">
+                                My Diaries
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{url_for('diary_app.add_diary')}}">
+                                My Posts
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 {% endif %}
             </ul>

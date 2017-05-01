@@ -76,7 +76,7 @@ def edit_diary(d_id):
 
 @diary_app.route('/add', methods=['GET', 'POST'])
 @login_required
-def edit_diary():
+def add_diary():
     form = DiaryForm()
     if form.validate_on_submit():
         d = Diary()
