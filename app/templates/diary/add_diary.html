@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}
+Alfred - Diary
+{% endblock %}
+
+{% block page_content %}
+<h2>Diary</h2>
+<div>
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
