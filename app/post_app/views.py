@@ -101,6 +101,7 @@ def edit(id):
             post.tags = list(set(post.tags))            # avoid repeated tags
         post.save()
         flash('Post has been updated.')
+        return redirect(url_for('.post_page', id=post.id))
     form.body.data = post.body
     form.tags.data = ','.join([Tag.objects(id=i).first().text for i in
                                post.tags])

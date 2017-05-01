@@ -376,7 +376,7 @@ class Diary(db.Document):
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=0)
     tags = db.ListField(db.StringField())
-    s_activity = db.ListField(db.StringField())
+    s_activity = db.ListField(db.StringField())         # Study activity
     s_time = db.IntField(default=0)
     o_activity = db.ListField(db.StringField())
     o_time = db.IntField(default=0)

@@ -12,11 +12,7 @@
                     href="{{ url_for('user_app.profile_page_id', user_id=post.author_id) }}">{{
                 get_username_from_id(diary.author_id) }}</a></div>
             <div class="post-body">
-                {% if post.body_html %}
-                    {{ diary.description_html | safe }}
-                {% else %}
-                    {{ diary_description }}
-                {% endif %}
+                {{ diary.title }}
             </div>
             <div class="post-footer">
                 {% if current_user.id == diary.author_id %}

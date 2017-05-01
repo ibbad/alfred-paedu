@@ -21,6 +21,7 @@ class Config:
         "POST": 1,
         "ACTIVITY": 2
     }
+    DIARIES_PER_PAGE = 10
 
     @staticmethod
     def init_app(app):

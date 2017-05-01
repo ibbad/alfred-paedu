@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+{% block title %}
+Alfred - Diary # {{diary.id}}
+{% endblock %}
+
+{% block page_content %}
+<h2>Title: {{diary.title}}</h2>
+{% if diary.body_html %}
+    {{ diary.description_html | safe }}
+{% else %}
+    {{ diary_description }}
+{% endif %}
+<h2> Study activity: {{diary.s_time}} hours spent </h2>
+<ul>
+    {% for s_a in diary.s_activity %}
+    <li> s_a </li>
+    {% endfor %}
+</ul>
+<!-- Other activity -->
+<h2> Other activities: {{diary.o_time}} hours spent </h2>
+<ul>
+    {% for o_a in diary.o_activity %}
+    <li> o_a </li>
+    {% endfor %}
+</ul>
+
+<div class="post-footer">
+    {% if current_user.id == diary.author_id %}
+    <a href="{{ url_for('.edit', id=diary.id) }}">
+        <span class="label label-primary">Edit</span>
+    </a>
+    {% endif %}
+    <a href="{{ url_for('.diary_page', id=diary.id) }}">
+        <span class="label label-default">Permalink</span>
+    </a>
+</div>
+{% endblock %}
