@@ -7,32 +7,34 @@ Alfred - Diary # {{diary.id}}
 
 {% block page_content %}
 <h2>Title: {{diary.title}}</h2>
-{% if diary.body_html %}
-    {{ diary.description_html | safe }}
+<br/>
+{% if diary.description_html %}
+    <b>Description</b>: {{ diary.description_html | safe }}
 {% else %}
-    {{ diary_description }}
+    <b>Description</b>: {{ diary_description }}
 {% endif %}
+<br/>
 <h2> Study activity: {{diary.s_time}} hours spent </h2>
 <ul>
     {% for s_a in diary.s_activity %}
-    <li> s_a </li>
+    <li> {{s_a}} </li>
     {% endfor %}
 </ul>
 <!-- Other activity -->
 <h2> Other activities: {{diary.o_time}} hours spent </h2>
 <ul>
     {% for o_a in diary.o_activity %}
-    <li> o_a </li>
+    <li> {{ o_a }} </li>
     {% endfor %}
 </ul>
 
 <div class="post-footer">
     {% if current_user.id == diary.author_id %}
-    <a href="{{ url_for('.edit', id=diary.id) }}">
+    <a href="{{ url_for('diary_app.edit_diary', d_id=diary.id) }}">
         <span class="label label-primary">Edit</span>
     </a>
     {% endif %}
-    <a href="{{ url_for('.diary_page', id=diary.id) }}">
+    <a href="{{ url_for('diary_app.diary_page', d_id=diary.id) }}">
         <span class="label label-default">Permalink</span>
     </a>
 </div>

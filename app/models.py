@@ -460,7 +460,7 @@ class Diary(db.Document):
                     description_html=forgery_py.lorem_ipsum.paragraphs(
                         quantity=1, sentences_quantity=2, html=True),
                     tags=[random.choice(tags)
-                          for _ in range(1, random.randint(1, 5))],
+                          for _ in range(1, random.randint(2, 5))],
                     author_id=random.choice(users),
                     s_activity=[forgery_py.lorem_ipsum.word()
                                 for _ in range(1, 5)],

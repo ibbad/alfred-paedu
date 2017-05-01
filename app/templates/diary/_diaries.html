@@ -3,24 +3,26 @@
     <li class="post">
         <div class="post-thumbnail">
             <a
-                    href="{{ url_for('user_app.profile_page_id', user_id=post.author_id) }}">
+                    href="{{ url_for('user_app.profile_page_id', user_id=diary.author_id) }}">
             </a>
         </div>
         <div class="post-content">
-            <div class="post-date">{{ moment(post.timestamp).fromNow() }}</div>
+            <div class="post-date">
+                {{ moment(diary.timestamp).fromNow() }}
+            </div>
             <div class="post-author"><a
-                    href="{{ url_for('user_app.profile_page_id', user_id=post.author_id) }}">{{
+                    href="{{ url_for('user_app.profile_page_id', user_id=diary.author_id) }}">{{
                 get_username_from_id(diary.author_id) }}</a></div>
             <div class="post-body">
                 {{ diary.title }}
             </div>
             <div class="post-footer">
                 {% if current_user.id == diary.author_id %}
-                <a href="{{ url_for('.edit', id=diary.id) }}">
+                <a href="{{ url_for('diary_app.edit_diary', d_id=diary.id) }}">
                     <span class="label label-primary">Edit</span>
                 </a>
                 {% endif %}
-                <a href="{{ url_for('.diary_page', id=diary.id) }}">
+                <a href="{{ url_for('diary_app.diary_page', d_id=diary.id) }}">
                     <span class="label label-default">Permalink</span>
                 </a>
             </div>

@@ -1,7 +1,7 @@
 """
 View controller for diary app views.
 """
-import datetime
+from datetime import datetime
 from . import diary_app, da_logger
 from .forms import DiaryForm
 from app.models import Diary, Tag
@@ -45,13 +45,13 @@ def edit_diary(d_id):
         abort(403)
     form = DiaryForm()
     if form.validate_on_submit():
-        d.title = form.title.data()
-        d.description = form.description.data()
+        d.title = form.title.data
+        d.description = form.description.data
         d.timestamp = datetime.utcnow()
         d.s_activity = [s_a.strip() for s_a in form.s_activity.data.split(',')]
-        d.s_time = form.s_time.data()
+        d.s_time = form.s_time.data
         d.o_activity = [o_a.strip() for o_a in form.o_activity.data.split(',')]
-        d.o_time = form.o_time.data()
+        d.o_time = form.o_time.data
         tag_data = form.tags.data
         if tag_data != '':
             tags = [t.strip() for t in tag_data.split(',')]
@@ -70,8 +70,10 @@ def edit_diary(d_id):
     form.s_activity.data = ','.join([s_a for s_a in d.s_activity])
     form.s_time.data = d.s_time
     form.o_activity.data = ','.join([o_a for o_a in d.o_activity])
-    form.o_time = d.o_time
-    return render_template('diary/edit_diary', form=form)
+    form.o_time.data = d.o_time
+    form.tags.data = ','.join([Tag.objects(id=i).first().text
+                               for i in d.tags])
+    return render_template('diary/edit_diary.html', form=form)
 
 
 @diary_app.route('/add', methods=['GET', 'POST'])

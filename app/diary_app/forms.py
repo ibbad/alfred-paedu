@@ -19,4 +19,4 @@ class DiaryForm(FlaskForm):
     s_time = IntegerField('Hours')
     o_activity = StringField('Other activities')
     o_time = IntegerField('Hours')
-
+    submit = SubmitField('Submit')
