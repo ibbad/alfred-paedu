@@ -61,10 +61,10 @@ def edit_diary(d_id):
                 else:
                     t = Tag(text=tag).save()
                     d.tags.append(t.id)
-            d.tags = list(set(d.tags))            # avoid repeated tags
+            d.tags = list(set(d.tags))               # avoid repeated tags
         d.save()
         flash('Diary is updated')
-        return redirect(url_for('.diary_page', id=d.id))
+        return redirect(url_for('.diary_page', d_id=d.id))
     form.title.data = d.title
     form.description.data = d.description
     form.s_activity.data = ','.join([s_a for s_a in d.s_activity])
@@ -101,5 +101,5 @@ def add_diary():
             d.tags = list(set(d.tags))            # avoid repeated tags
         d.save()
         flash('Diary is updated')
-        return redirect(url_for('.diary_page', id=d.id))
+        return redirect(url_for('.diary_page', d_id=d.id))
     return render_template('diary/add_diary', form=form)

@@ -14,6 +14,8 @@ Alfred - Diary # {{diary.id}}
     <b>Description</b>: {{ diary_description }}
 {% endif %}
 <br/>
+<b>Tags</b>: {{ get_tag_text_list(diary.tags) }}
+<br/>
 <h2> Study activity: {{diary.s_time}} hours spent </h2>
 <ul>
     {% for s_a in diary.s_activity %}

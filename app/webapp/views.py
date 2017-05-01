@@ -4,7 +4,7 @@ Module containing generic functions for Jinja2 Template.
 
 from flask import render_template, current_app, abort, request
 from app.webapp import webapp, webapp_logger
-from app.models import User, Comment
+from app.models import User, Comment, Tag
 
 
 @webapp.route('/')
@@ -72,3 +72,14 @@ def get_post_comment_count(post_id):
     """
     return Comment.objects(c_type=current_app.config["COMMENT_TYPE"][
         "POST"], post_id=post_id).count()
+
+
+@webapp.add_app_template_global
+def get_tag_text_list(tag_id_list):
+    """
+    Returns the text of tag from the database.
+    :param tag_id: list of tag_ids.
+    :return list of tags (text): String.
+    """
+    return ','.join([Tag.objects(id=i).first().text
+                     for i in tag_id_list])
