@@ -182,6 +182,7 @@ class Post(db.Document):
     __collectionname__ = "Post"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
+    body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=0)
     comments = db.ListField(db.IntField(), default=[])
@@ -377,9 +378,9 @@ class Diary(db.Document):
     author_id = db.IntField(min_value=0)
     tags = db.ListField(db.IntField())
     s_activity = db.ListField(db.StringField())         # Study activity
-    s_time = db.IntField(default=0)
+    s_time = db.FloatField(default=0)
     o_activity = db.ListField(db.StringField())
-    o_time = db.IntField(default=0)
+    o_time = db.FloatField(default=0)
     # No comments for personal diary
 
     def to_json(self):
@@ -719,7 +720,6 @@ class User(UserMixin, db.Document):
     first_name = db.StringField(max_length=64)
     last_name = db.StringField(max_length=64)
     phone = db.StringField(max_length=20)
-    company = db.StringField(max_length=64)
     address = db.EmbeddedDocumentField(document_type=Address)
     joined = db.DateTimeField(default=datetime.utcnow())
 
@@ -946,7 +946,6 @@ class User(UserMixin, db.Document):
             'username': self.username,
             'name': '%s %s' % (self.first_name, self.last_name),
             'address': self.address.to_json() if self.address else '',
-            'company': self.company,
             'phone': self.phone,
             'email': self.email,
         }
@@ -967,7 +966,6 @@ class User(UserMixin, db.Document):
             if data.get('name') is not None:
                 user.first_name = data.get('name')['first'] or ''
                 user.last_name = data.get('name')['last'] or ''
-            user.company = data.get('company') or ''
             user.phone = data.get('phone') or ''
             user.address = Address.from_json(data.get('address')) \
                 if data.get('address') else None
@@ -985,7 +983,6 @@ class User(UserMixin, db.Document):
         if data.get('name') is not None:
             self.first_name = data.get('name')['first'] or self.first_name
             self.last_name = data.get('name')['last'] or self.last_name
-        self.company = data.get('company') or self.company
         self.phone = data.get('phone') or self.phone
         if data.get('address') is not None:
             self.address = Address.from_json(data.get('address'))
@@ -1046,8 +1043,7 @@ class User(UserMixin, db.Document):
                     first_name=forgery_py.name.first_name(),
                     last_name=forgery_py.name.last_name(),
                     confirmed=True,
-                    phone=forgery_py.address.phone(),
-                    company=forgery_py.lorem_ipsum.word()
+                    phone=forgery_py.address.phone()
                 )
 
                 address = Address(

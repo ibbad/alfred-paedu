@@ -29,7 +29,6 @@ class EditProfileForm(Form):
     # Get subscriber's personal information
     first_name = StringField('First name', validators=[Length(0, 64)])
     last_name = StringField('Last name', validators=[Length(0, 64)])
-    company = StringField('Company name', validators=[Length(0, 64)])
     phone = StringField('Phone number', validators=[Length(0, 20)])
 
     # Get user's address information
@@ -65,7 +64,6 @@ class EditProfileAdminForm(Form):
     confirmed = BooleanField('Confirmed')
     first_name = StringField('First name', validators=[Length(0, 64)])
     last_name = StringField('Last name', validators=[Length(0, 64)])
-    company = StringField('Company name', validators=[Length(0, 64)])
     phone = StringField('Phone number', validators=[Length(0, 20)])
 
     # Edit user's address information

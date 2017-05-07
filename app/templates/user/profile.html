@@ -30,9 +30,6 @@
 
         {% endif %}
         <h3>Billing Address</h3>
-        {% if user.company %}
-            <strong>{{ user.company|capitalize }}</strong>
-        {% endif %}
         {% if user.address %}
             {{ user.address.street|capitalize }}<br>
             {{ user.address.postalcode}},

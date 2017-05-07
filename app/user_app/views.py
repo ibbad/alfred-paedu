@@ -105,7 +105,6 @@ def edit_profile():
     form = EditProfileForm(
         first_name=current_user.first_name,
         last_name=current_user.last_name,
-        company=current_user.company,
         phone=current_user.phone,
         country=get_country_key(current_user.address.country) if
         current_user.address else None)
@@ -116,7 +115,6 @@ def edit_profile():
                               current_user.id)
         current_user.first_name = form.first_name.data
         current_user.last_name = form.last_name.data
-        current_user.company = form.company.data
         current_user.phone = form.phone.data
         # If there is no address previously, create address object.
         if current_user.address is None:
