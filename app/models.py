@@ -273,7 +273,7 @@ class Post(db.Document):
 class Comment(db.Document):
     """
     This document is the blue print for a comment. A comment may be
-    associated to wallpost, activity, or any other kind of post.
+    associated to wallpost, activity_app, or any other kind of post.
     """
     __collectionname__ = "Comment"
     id = db.SequenceField(primary_key=True)
@@ -282,7 +282,7 @@ class Comment(db.Document):
     commenter_id = db.IntField(min_value=0)
     post_id = db.IntField()
     disabled = db.BooleanField(default=False)
-    # type of comment = 1:post, 2:activity
+    # type of comment = 1:post, 2:activity_app
     c_type = db.IntField(default=Config.COMMENT_TYPE['POST'])
 
     def to_json(self):
@@ -323,7 +323,7 @@ class Comment(db.Document):
                 c.commenter_id = 0
             else:
                 c.commenter_id = data.get('commenter_id')
-            c.type = 2 if data.get('type').lower() == 'activity' else 1
+            c.type = 2 if data.get('type').lower() == 'activity_app' else 1
             return c
         except Exception as el1:
             logging.error('Unable to get comments object from json '
@@ -375,7 +375,7 @@ class Diary(db.Document):
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=0)
     tags = db.ListField(db.IntField())
-    s_activity = db.ListField(db.StringField())         # Study activity
+    s_activity = db.ListField(db.StringField())         # Study activity_app
     s_time = db.FloatField(default=0)
     o_activity = db.ListField(db.StringField())
     o_time = db.FloatField(default=0)
@@ -384,7 +384,7 @@ class Diary(db.Document):
     def to_json(self):
         """
         This function converts diary document to json object.
-        :return activity object: in JSON format
+        :return activity_app object: in JSON format
         """
         try:
             return jsonify({
@@ -409,7 +409,7 @@ class Diary(db.Document):
         """
         This function extracts diary object using data provided in JSON
         format and returns it to the user.
-        :return activity object:
+        :return activity_app object:
         """
         try:
             diary = Diary()
@@ -479,20 +479,21 @@ class Activity(db.Document):
     activities. and other people can comment on them as well as decide to
     join to show their interest in the activities.
     """
-    __collectionname__ = 'activity'
+    __collectionname__ = 'activity_app'
     id = db.SequenceField(primary_key=True)
     title = db.StringField()
     description = db.StringField()
+    author_id = db.IntField(min_value=0)
     timestamp = db.DateTimeField(default=datetime.utcnow())
     activity_time = db.DateTimeField()
-    tags = db.ListField(db.StringField())
+    tags = db.ListField(db.IntField())
     interested = db.ListField(db.IntField(min_value=1))
     going = db.ListField(db.IntField(min_value=1))
     comments = db.ListField(db.StringField())     # string must be Comment:json
 
     def to_json(self):
         """
-        This function returns the json representation of activity object.
+        This function returns the json representation of activity_app object.
         :return:
         """
         try:
@@ -511,16 +512,16 @@ class Activity(db.Document):
                              for i in self.comments]
             })
         except Exception as el1:
-            logging.error('Unable to convert activity object={0} to JSON. '
+            logging.error('Unable to convert activity_app object={0} to JSON. '
                           'Error{1}'.format(self.id, el1))
             return None
 
     @staticmethod
     def from_json(data):
         """
-        This function creates and returns activity object from json data.
-        :param data: json formatted string containing activity data.
-        :return activity: object
+        This function creates and returns activity_app object from json data.
+        :param data: json formatted string containing activity_app data.
+        :return activity_app: object
         """
         try:
             activity = Activity()
@@ -551,7 +552,7 @@ class Activity(db.Document):
                         pass
             return activity
         except Exception as el1:
-            logging.error('Unable to extract activity object from JSON data. '
+            logging.error('Unable to extract activity_app object from JSON data. '
                           'Error={0}'.format(el1))
             return None
 
@@ -561,7 +562,7 @@ class Activity(db.Document):
         This function generates and stores fake enteries for Activity
         documents for
         testing purposes.
-        :param count: number of fake activity entries to be generated.
+        :param count: number of fake activity_app entries to be generated.
         """
 
         random.seed()
@@ -585,11 +586,13 @@ class Activity(db.Document):
                                 for _ in range(1, random.randint(1, 7))],
                     going=[random.choice(users)
                            for _ in range(1, random.randint(1, 5))],
+                    author_id=random.choice(users)
                 ).save()
                 c += 1
             except (ValidationError, NotUniqueError):
                 pass
-            except Exception:
+            except Exception as e:
+                print(e)
                 pass
 
 

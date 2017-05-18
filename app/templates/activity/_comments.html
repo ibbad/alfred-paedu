@@ -24,10 +24,10 @@
                 <br>
                 {% if comment.disabled %}
                 <a class="btn btn-default btn-xs"
-                   href="{{ url_for('post_app.moderate_enable', id=comment.id, page=page) }}">Enable</a>
+                   href="{{ url_for('activity_app.moderate_enable', id=comment.id, page=page) }}">Enable</a>
                 {% else %}
                 <a class="btn btn-danger btn-xs"
-                   href="{{ url_for('post_app.moderate_disable', id=comment.id, page=page) }}">Disable</a>
+                   href="{{ url_for('activity_app.moderate_disable', id=comment.id, page=page) }}">Disable</a>
                 {% endif %}
             {% endif %}
         </div>

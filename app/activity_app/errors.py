@@ -1,12 +1,12 @@
 """
-Default error handlers for diaries module.
+Default error handlers for activity module.
 """
 
 from flask import render_template, request, jsonify
-from . import diary_app
+from . import activity_app
 
 
-@diary_app.app_errorhandler(403)
+@activity_app.app_errorhandler(403)
 def forbidden(e):
     if request.accept_mimetypes.accept_json and \
             not request.accept_mimetypes.accept_html:
@@ -17,7 +17,7 @@ def forbidden(e):
     return render_template('errors/403.html', message=e), 403
 
 
-@diary_app.app_errorhandler(404)
+@activity_app.app_errorhandler(404)
 def page_not_found(e):
     if request.accept_mimetypes.accept_json and \
             not request.accept_mimetypes.accept_html:
@@ -28,7 +28,7 @@ def page_not_found(e):
     return render_template('errors/404.html', message=e), 404
 
 
-@diary_app.app_errorhandler(500)
+@activity_app.app_errorhandler(500)
 def internal_server_error(e):
     if request.accept_mimetypes.accept_json and \
             not request.accept_mimetypes.accept_html:

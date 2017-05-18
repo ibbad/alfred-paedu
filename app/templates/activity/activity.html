@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+{% block title %}
+Alfred - Activity # {{activity.id}}
+{% endblock %}
+
+{% block page_content %}
+<h2>Title:</h2>
+<h3>{{activity.title}}</h3>
+<h2>Description</h2>
+{% if activity.description %}
+{{ activity.description| safe }}
+{% endif %}
+<br/>
+<b>Tags</b>:</br> {{ get_tag_text_list(activity.tags) }}
+<br/>
+<h3> Interested:</h3>
+<br/>
+
+{% for iid in activity.interested %}
+<a href="{{ url_for('user_app.profile_page_id', user_id=iid) }}">
+    {{ get_username_from_id(iid) }}
+</a>
+{% endfor %}
+
+<h3> Attending people:</h3>
+{% for gid in activity.going %}
+<a href="{{ url_for('user_app.profile_page_id', user_id=gid) }}">
+    {{ get_username_from_id(gid) }}
+</a>
+{% endfor %}
+<div>
+    {{ wtf.quick_form(form) }}
+</div>
+{% include 'activity/_comments.html' %}
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, 'activity_app.activity_page',
+    fragment='#comments', a_id=activity.id) }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
+

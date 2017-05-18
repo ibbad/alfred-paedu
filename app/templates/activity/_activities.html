@@ -1,0 +1,38 @@
+<ul class="posts">
+    {% for activity in activities %}
+    <li class="post">
+        <div class="post-thumbnail">
+            <a
+              href="{{ url_for('user_app.profile_page_id', user_id=activity.author_id) }}">
+            </a>
+        </div>
+        <div class="post-content">
+            <div class="post-date">{{ moment(activity.timestamp).fromNow()
+                }}</div>
+            <div class="post-author"><a
+                    href="{{ url_for('user_app.profile_page_id', user_id=activity.author_id) }}">
+                {{get_username_from_id(activity.author_id) }}</a></div>
+            <div class="post-body">
+                {% if activity.description %}
+                    {{ activity.description | safe }}
+                {% endif %}
+            </div>
+            <div class="post-footer">
+                {% if current_user.id == activity.author_id %}
+                <a href="{{ url_for('.edit_activity', a_id=activity.id) }}">
+                    <span class="label label-primary">Edit</span>
+                </a>
+                {% endif %}
+                <a href="{{ url_for('.activity_page', a_id=activity.id) }}">
+                    <span class="label label-default">Permalink</span>
+                </a>
+                <a href="{{ url_for('.activity_page', a_id=activity.id) }}#comments">
+                    <span class="label label-primary">
+                        {{get_activity_comment_count(activity.id)}} Comments
+                    </span>
+                </a>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

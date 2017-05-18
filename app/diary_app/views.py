@@ -100,6 +100,7 @@ def add_diary():
                     t = Tag(text=tag).save()
                     d.tags.append(t.id)
             d.tags = list(set(d.tags))            # avoid repeated tags
+        d.author_id = current_user.id
         d.save()
         flash('Diary is updated')
         return redirect(url_for('.diary_page', d_id=d.id))

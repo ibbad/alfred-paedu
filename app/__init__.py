@@ -78,4 +78,9 @@ def create_app(config_name):
     from app.diary_app import diary_app as diary_app_blueprint
     app.register_blueprint(diary_app_blueprint,
                            url_prefix='/diary')
+
+    # Register activity_app app blueprint
+    from app.activity_app import activity_app as activity_app_blueprint
+    app.register_blueprint(activity_app_blueprint,
+                           url_prefix='/activity')
     return app

@@ -73,6 +73,16 @@ def get_post_comment_count(post_id):
     return Comment.objects(c_type=current_app.config["COMMENT_TYPE"][
         "POST"], post_id=post_id).count()
 
+@webapp.add_app_template_global
+def get_activity_comment_count(activity_id):
+    """
+    Returns the count for comments on given activity.
+    :param user_id: ID of the subscriber whose first and last name is required.
+    :return username: String.
+    """
+    return Comment.objects(c_type=current_app.config["COMMENT_TYPE"][
+        "ACTIVITY"], post_id=activity_id).count()
+
 
 @webapp.add_app_template_global
 def get_tag_text_list(tag_id_list):
