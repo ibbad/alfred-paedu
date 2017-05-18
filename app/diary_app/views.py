@@ -62,6 +62,7 @@ def edit_diary(d_id):
                     t = Tag(text=tag).save()
                     d.tags.append(t.id)
             d.tags = list(set(d.tags))               # avoid repeated tags
+        d.author_id = current_user.id
         d.save()
         flash('Diary is updated')
         return redirect(url_for('.diary_page', d_id=d.id))
@@ -82,13 +83,13 @@ def add_diary():
     form = DiaryForm()
     if form.validate_on_submit():
         d = Diary()
-        d.title = form.title.data()
-        d.description = form.description.data()
+        d.title = form.title.data
+        d.description = form.description.data
         d.timestamp = datetime.utcnow()
         d.s_activity = [s_a.strip() for s_a in form.s_activity.data.split(',')]
-        d.s_time = form.s_time.data()
+        d.s_time = form.s_time.data
         d.o_activity = [o_a.strip() for o_a in form.o_activity.data.split(',')]
-        d.o_time = form.o_time.data()
+        d.o_time = form.o_time.data
         tag_data = form.tags.data
         if tag_data != '':
             tags = [t.strip() for t in tag_data.split(',')]
@@ -102,4 +103,6 @@ def add_diary():
         d.save()
         flash('Diary is updated')
         return redirect(url_for('.diary_page', d_id=d.id))
-    return render_template('diary/add_diary', form=form)
+    form.o_time.data = 0
+    form.s_time.data = 0
+    return render_template('diary/add_diary.html', form=form)

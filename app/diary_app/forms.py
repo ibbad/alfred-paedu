@@ -3,7 +3,7 @@ Forms templates for Diary forms
 """
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField
+from wtforms import StringField, SubmitField, FloatField
 from wtforms import validators
 from flask_pagedown.fields import PageDownField
 
@@ -16,7 +16,7 @@ class DiaryForm(FlaskForm):
     description = PageDownField('Description')
     tags = StringField('Tags')
     s_activity = StringField('Study activities')
-    s_time = IntegerField('Hours')
+    s_time = FloatField('Hours')
     o_activity = StringField('Other activities')
-    o_time = IntegerField('Hours')
+    o_time = FloatField('Hours')
     submit = SubmitField('Submit')

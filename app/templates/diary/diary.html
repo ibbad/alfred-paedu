@@ -8,22 +8,21 @@ Alfred - Diary # {{diary.id}}
 {% block page_content %}
 <h2>Title: {{diary.title}}</h2>
 <br/>
-{% if diary.description_html %}
-    <b>Description</b>: {{ diary.description_html | safe }}
-{% else %}
-    <b>Description</b>: {{ diary_description }}
+<h2>Description</h2>
+{% if diary.description %}
+    {{ diary.description| safe }}
 {% endif %}
+<br/><br/>
+<b>Tags</b>:</br> {{ get_tag_text_list(diary.tags) }}
 <br/>
-<b>Tags</b>: {{ get_tag_text_list(diary.tags) }}
-<br/>
-<h2> Study activity: {{diary.s_time}} hours spent </h2>
+<h3> Study activity: {{diary.s_time}} hours spent </h3>
 <ul>
     {% for s_a in diary.s_activity %}
     <li> {{s_a}} </li>
     {% endfor %}
 </ul>
 <!-- Other activity -->
-<h2> Other activities: {{diary.o_time}} hours spent </h2>
+<h3> Other activities: {{diary.o_time}} hours spent </h3>
 <ul>
     {% for o_a in diary.o_activity %}
     <li> {{ o_a }} </li>
