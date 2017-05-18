@@ -1,7 +1,7 @@
 """
 View controller for post app view.
 """
-import datetime
+from datetime import datetime
 from . import post_app, pa_logger
 from .forms import PostForm, CommentForm
 from app.models import Post, Tag, Comment
@@ -17,7 +17,6 @@ def index():
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.body.data,
-                    body_html=form.body_html.data,
                     author_id=current_user.id)
         tag_data = form.tags.data
         if tag_data != '':
@@ -86,7 +85,7 @@ def edit(id):
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
-        post.body = post.body.data
+        post.body = form.body.data
         post.timestamp = datetime.utcnow()
         tag_data = form.tags.data
         if tag_data != '':
