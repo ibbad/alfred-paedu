@@ -50,7 +50,6 @@ def my_posts():
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.body.data,
-                    body_html=form.body_html.data,
                     author_id=current_user.id)
         tag_data = form.tags.data
         if tag_data != '':

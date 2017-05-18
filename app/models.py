@@ -182,7 +182,6 @@ class Post(db.Document):
     __collectionname__ = "Post"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
-    body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=0)
     comments = db.ListField(db.IntField(), default=[])
@@ -264,8 +263,10 @@ class Post(db.Document):
                 ).save()
                 c += 1
             except (ValidationError, NotUniqueError):
+                print(e)
                 pass
-            except Exception:
+            except Exception as e:
+                print(e)
                 pass
 
 
@@ -360,7 +361,8 @@ class Comment(db.Document):
                 c += 1
             except (ValidationError, NotUniqueError):
                 pass
-            except Exception:
+            except Exception as e:
+                print(e)
                 pass
 
 
