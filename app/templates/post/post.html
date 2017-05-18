@@ -8,8 +8,7 @@ Alfred - Post
 
 {% block page_content %}
 {% include 'post/_posts.html' %}
-<h4 id="comments">Comments</h4>
-<div class="comment-form">
+<div>
     {{ wtf.quick_form(form) }}
 </div>
 {% include 'post/_comments.html' %}
@@ -19,4 +18,9 @@ Alfred - Post
     fragment='#comments', id=posts[0].id) }}
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}

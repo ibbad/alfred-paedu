@@ -12,10 +12,8 @@
                     href="{{ url_for('user_app.profile_page_id', user_id=post.author_id) }}">{{
                 get_username_from_id(post.author_id) }}</a></div>
             <div class="post-body">
-                {% if post.body_html %}
-                    {{ post.body_html | safe }}
-                {% else %}
-                    {{ post.body }}
+                {% if post.body %}
+                    {{ post.body| safe }}
                 {% endif %}
             </div>
             <div class="post-footer">

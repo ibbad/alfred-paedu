@@ -278,7 +278,6 @@ class Comment(db.Document):
     __collectionname__ = "Comment"
     id = db.SequenceField(primary_key=True)
     body = db.StringField()
-    body_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     commenter_id = db.IntField(min_value=0)
     post_id = db.IntField()
@@ -315,8 +314,7 @@ class Comment(db.Document):
         try:
             c = Comment()
             c.body = data.get('body') or None
-            c.body_html = data.get('body_html') or None
-            if c.body is None and c.body_html is not None:
+            if c.body is None:
                 logging.error('No data in body/body_html provided for '
                               'creating wallpost comments object')
                 raise ValidationError('Comments must have a body')
@@ -351,8 +349,7 @@ class Comment(db.Document):
         while c < count:
             try:
                 Comment(
-                    body=forgery_py.lorem_ipsum.sentences(quantity=1),
-                    body_html=forgery_py.lorem_ipsum.paragraph(
+                    body=forgery_py.lorem_ipsum.paragraph(
                         html=True, sentences_quantity=2),
                     commenter_id=random.choice(users),
                     post_id=random.choice(posts),
@@ -375,7 +372,6 @@ class Diary(db.Document):
     id = db.SequenceField(primary_key=True)
     title = db.StringField()
     description = db.StringField()
-    description_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     author_id = db.IntField(min_value=0)
     tags = db.ListField(db.IntField())
@@ -395,7 +391,6 @@ class Diary(db.Document):
                 "id": self.id,
                 "title": self.title,
                 "description": self.description,
-                "description_html": self.description_html,
                 "timestamp": self.timestamp,
                 "author_id": User.objects(id=self.author_id).first().username,
                 "tags": [Tag.objects(id=i).first().text for i in self.tags],
@@ -420,7 +415,6 @@ class Diary(db.Document):
             diary = Diary()
             diary.title = data.get('title') or ''
             diary.description = data.get('description') or ''
-            diary.description_html = data.get('description_html') or ''
             diary.author_id = data.get('author_id') or 0
             # FIXME: All tags will be saved even if the post is not saved in db.
             if data.get('tags') and len(data.get('tags')) > 0:
@@ -459,8 +453,7 @@ class Diary(db.Document):
             try:
                 Diary(
                     title=forgery_py.lorem_ipsum.word(),
-                    description=forgery_py.lorem_ipsum.sentences(quantity=2),
-                    description_html=forgery_py.lorem_ipsum.paragraphs(
+                    description=forgery_py.lorem_ipsum.paragraphs(
                         quantity=1, sentences_quantity=2, html=True),
                     tags=[random.choice(tags)
                           for _ in range(1, random.randint(2, 5))],
@@ -490,7 +483,6 @@ class Activity(db.Document):
     id = db.SequenceField(primary_key=True)
     title = db.StringField()
     description = db.StringField()
-    description_html = db.StringField()
     timestamp = db.DateTimeField(default=datetime.utcnow())
     activity_time = db.DateTimeField()
     tags = db.ListField(db.StringField())
@@ -508,7 +500,6 @@ class Activity(db.Document):
                 "id": self.id,
                 "title": self.title,
                 "description": self.description,
-                "description_html": self.description_html,
                 "timestamp": self.timestamp,
                 "activity_time": self.activity_time,
                 "tags": [Tag.objects(id=i).first().text for i in self.tags],
@@ -535,7 +526,6 @@ class Activity(db.Document):
             activity = Activity()
             activity.title = data.get('title') or ''
             activity.description = data.get('description') or ''
-            activity.description_html = data.get('description_html') or ''
             activity.activity_time = data.get('activity_time') or ''
             # FIXME: All tags will be saved even if the post is not saved in db.
             if data.get('tags') and len(data.get('tags')) > 0:
@@ -583,8 +573,7 @@ class Activity(db.Document):
             try:
                 Activity(
                     title=forgery_py.lorem_ipsum.sentence(),
-                    description=forgery_py.lorem_ipsum.sentences(quantity=2),
-                    description_html=forgery_py.lorem_ipsum.paragraph(
+                    description=forgery_py.lorem_ipsum.paragraph(
                         sentences_quantity=2, html=True),
                     activity_time=datetime.utcnow()+timedelta(
                         days=random.randint(1, 7)),

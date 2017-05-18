@@ -61,7 +61,7 @@ def my_posts():
                     post.tags.append(t.id)
                 post.tags = list(set(post.tags))        # avoid repeated tags
         post.save()
-        return redirect(url_for('.index'))
+        return redirect(url_for('.my_posts'))
 
     page = request.args.get('page', 1, type=int)
     qs = Post.objects(author_id=current_user.id).order_by('-timestamp')
