@@ -48,6 +48,30 @@
             </a>
         {% endif %}
     </p>
+    <h3>Friends</h3>
+        {% for uid in current_user.friends %}
+            <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
+                {{ get_username_from_id(uid) }},
+            </a>
+        {% endfor %}
     </div>
+    {% if current_user.is_student %}
+    <h3>Teachers</h3>
+        {% for uid in current_user.teachers %}
+            <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
+                {{ get_username_from_id(uid) }},
+            </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if current_user.is_student %}
+        <h3>Parents</h3>
+            {% for uid in current_user.parents %}
+                <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
+                    {{ get_username_from_id(uid) }},
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

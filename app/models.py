@@ -263,10 +263,8 @@ class Post(db.Document):
                 ).save()
                 c += 1
             except (ValidationError, NotUniqueError):
-                print(e)
                 pass
-            except Exception as e:
-                print(e)
+            except Exception:
                 pass
 
 
@@ -358,8 +356,7 @@ class Comment(db.Document):
                 c += 1
             except (ValidationError, NotUniqueError):
                 pass
-            except Exception as e:
-                print(e)
+            except Exception:
                 pass
 
 
@@ -468,8 +465,7 @@ class Diary(db.Document):
                 c += 1
             except (ValidationError, NotUniqueError):
                 pass
-            except Exception as e:
-                print(e)
+            except Exception:
                 pass
 
 
@@ -591,8 +587,7 @@ class Activity(db.Document):
                 c += 1
             except (ValidationError, NotUniqueError):
                 pass
-            except Exception as e:
-                print(e)
+            except Exception:
                 pass
 
 
