@@ -108,9 +108,9 @@ def activity_page(a_id):
             a.save()
             flash('You are marked as going')
         elif cf.cancel.data:
-            if current_user in a.going:
+            if current_user.id in a.going:
                 a.going.remove(current_user.id)
-            if current_user in a.interested:
+            if current_user.id in a.interested:
                 a.interested.remove(current_user.id)
             a.save()
             flash('Your interest has been removed')

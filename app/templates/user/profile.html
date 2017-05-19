@@ -80,10 +80,9 @@
     {% endif %}
 
 
-
     {% if current_user.is_student %}
     <div style="margin-top: 15px; margin-left: 5px;">
-    <h3>Teachers</h3>
+    <h3>Parents</h3>
 
         <ul style="list-style: none;">
             {% for uid in current_user.parents %}

@@ -199,7 +199,7 @@ def _add_user_associations():
     user.save()
 
     # Add friendships
-    uid = User.objects.values_list('id')
+    uid = User.objects.filter(role__ne=2).values_list('id')
     for user in User.objects.all():
         for i in uid:
             if user.id != i:
