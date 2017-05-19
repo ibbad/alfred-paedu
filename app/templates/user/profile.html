@@ -48,30 +48,53 @@
             </a>
         {% endif %}
     </p>
-    <h3>Friends</h3>
-        {% for uid in current_user.friends %}
-            <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
-                {{ get_username_from_id(uid) }},
-            </a>
-        {% endfor %}
+
+    <h3> Friends</h3>
+    <div style="margin-top: 15px; margin-left: 5px;">
+        <ul style="list-style: none;">
+            {% for uid in current_user.friends %}
+                <li>
+                   <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
+                        {{ get_username_from_id(uid) }},
+                    </a>
+                </li>
+
+            {% endfor %}
+        </ul>
     </div>
+
     {% if current_user.is_student %}
+    <div style="margin-top: 15px; margin-left: 5px;">
     <h3>Teachers</h3>
-        {% for uid in current_user.teachers %}
-            <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
-                {{ get_username_from_id(uid) }},
-            </a>
-        {% endfor %}
+
+        <ul style="list-style: none;">
+            {% for uid in current_user.teachers %}
+                <li>
+                   <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
+                        {{ get_username_from_id(uid) }},
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
     {% endif %}
+
+
+
     {% if current_user.is_student %}
-        <h3>Parents</h3>
+    <div style="margin-top: 15px; margin-left: 5px;">
+    <h3>Teachers</h3>
+
+        <ul style="list-style: none;">
             {% for uid in current_user.parents %}
-                <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
-                    {{ get_username_from_id(uid) }},
-                </a>
+                <li>
+                   <a href="{{ url_for('user_app.profile_page_id', user_id=uid) }}">
+                        {{ get_username_from_id(uid) }},
+                    </a>
+                </li>
             {% endfor %}
-        </div>
+        </ul>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

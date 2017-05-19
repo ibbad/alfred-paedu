@@ -6,30 +6,58 @@ Alfred - Activity # {{activity.id}}
 {% endblock %}
 
 {% block page_content %}
-<h2>Title:</h2>
-<h3>{{activity.title}}</h3>
-<h2>Description</h2>
-{% if activity.description %}
-{{ activity.description| safe }}
-{% endif %}
-<br/>
-<b>Tags</b>:</br> {{ get_tag_text_list(activity.tags) }}
-<br/>
-<h3> Interested:</h3>
-<br/>
+<h2 style="text-align: center">{{activity.title}}</h2>
 
-{% for iid in activity.interested %}
-<a href="{{ url_for('user_app.profile_page_id', user_id=iid) }}">
-    {{ get_username_from_id(iid) }}
-</a>
-{% endfor %}
+    <div style="margin: 5px">
+    <h3>Description:</h3>
+    <div style="text-indent: 1em;">
+        {% if activity.description %}
+    {{ activity.description| safe }}
+    {% endif %}
+    </div>
 
-<h3> Attending people:</h3>
-{% for gid in activity.going %}
-<a href="{{ url_for('user_app.profile_page_id', user_id=gid) }}">
-    {{ get_username_from_id(gid) }}
-</a>
-{% endfor %}
+        <div style="margin-top: 15px; margin-left: 15px;">
+        <b>Tags:  </b>
+        {% for tag in activity.tags %}
+            <span class="badge badge-default">{{ get_tag_text(tag) }}</span>
+        {% endfor %}
+    </div>
+
+    </div>
+
+
+    <div style="margin-top: 15px; margin-left: 5px;">
+
+    <h3> Interested:</h3>
+
+        <ul style="list-style: none;">
+            {% for iid in activity.interested %}
+                <li>
+                   <a href="{{ url_for('user_app.profile_page_id', user_id=iid) }}">
+                    {{ get_username_from_id(iid) }}
+                </a>
+                </li>
+
+            {% endfor %}
+        </ul>
+    </div>
+
+
+    <div style="margin-top: 15px; margin-left: 5px;">
+    <h3> Attending people:</h3>
+        <ul style="list-style: none;">
+            {% for gid in activity.going %}
+                <li>
+                            <a href="{{ url_for('user_app.profile_page_id', user_id=gid) }}">
+                {{ get_username_from_id(gid) }}
+            </a>
+                </li>
+
+            {% endfor %}
+        </ul>
+
+    </div>
+
 <div>
     {{ wtf.quick_form(form) }}
 </div>

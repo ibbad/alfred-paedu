@@ -485,7 +485,7 @@ class Activity(db.Document):
     tags = db.ListField(db.IntField())
     interested = db.ListField(db.IntField(min_value=1))
     going = db.ListField(db.IntField(min_value=1))
-    comments = db.ListField(db.StringField())     # string must be Comment:json
+    comments = db.ListField(db.IntField(), default=[])     # string must be Comment:json
 
     def to_json(self):
         """
@@ -600,7 +600,7 @@ class Suggestion(db.Document):
     __collectionname__ = 'suggestion'
     id = db.SequenceField(primary_key=True)
     query = db.StringField()
-    responses = db.ListField(db.StringField())
+    responses = db.ListField(db.StringField(), default=[])
 
     def to_json(self):
         """

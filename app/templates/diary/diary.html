@@ -6,28 +6,47 @@ Alfred - Diary # {{diary.id}}
 {% endblock %}
 
 {% block page_content %}
-<h2>Title: {{diary.title}}</h2>
+<h2 style="text-align: center">{{diary.title}}</h2>
 <br/>
-<h2>Description</h2>
-{% if diary.description %}
-    {{ diary.description| safe }}
-{% endif %}
-<br/><br/>
-<b>Tags</b>:</br> {{ get_tag_text_list(diary.tags) }}
-<br/>
-<h3> Study activity: {{diary.s_time}} hours spent </h3>
-<ul>
-    {% for s_a in diary.s_activity %}
-    <li> {{s_a}} </li>
-    {% endfor %}
-</ul>
+<div style="margin: 5px">
+    <h3>Description:</h3>
+    <div style="text-indent: 1em;">
+        {% if diary.description %}
+        {{ diary.description| safe }}
+        {% endif %}
+    </div>
+
+        <div style="margin-top: 15px; margin-left: 15px;">
+        <b>Tags:  </b>
+        {% for tag in diary.tags %}
+            <span class="badge badge-default">{{ get_tag_text(tag) }}</span>
+        {% endfor %}
+    </div>
+
+</div>
+
+<div style="margin-top: 15px; margin-left: 5px;">
+<h3> Study activity: {{diary.s_time}} hours spent</h3>
+    <ul style="list-style: none;">
+        {% for s_a in diary.s_activity %}
+        <li>
+                 {{ s_a }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 <!-- Other activity_app -->
-<h3> Other activities: {{diary.o_time}} hours spent </h3>
-<ul>
-    {% for o_a in diary.o_activity %}
-    <li> {{ o_a }} </li>
-    {% endfor %}
-</ul>
+
+<div style="margin-top: 15px; margin-left: 5px;">
+<h3> Other activities: {{diary.o_time}} hours spent</h3>
+    <ul style="list-style: none;">
+        {% for o_a in diary.o_activity %}
+        <li>
+                 {{ o_a }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 
 <div class="post-footer">
     {% if current_user.id == diary.author_id %}

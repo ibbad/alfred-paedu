@@ -25,7 +25,7 @@ Alfred - Suggestions
 <h2> Responses </h2>
 <ol>
     {% for r in responses %}
-    <li class="comment-body">{{ r }}</li>
+    <li class="comment-body">{{ r |safe }}</li>
     {% endfor %}
 </ol>
 {% else %}
@@ -34,7 +34,10 @@ Alfred - Suggestions
 </p>
 </div>
 {% endif %}
+{% endblock %}
 
 
-
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}

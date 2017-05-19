@@ -92,9 +92,6 @@ def edit_activity(a_id):
 @activity_app.route('/<int:a_id>', methods=['GET', 'POST'])
 @login_required
 def activity_page(a_id):
-    print('%' * 80)
-    print(a_id)
-    print('%' * 80)
     a = Activity.objects(id=a_id).get_or_404()
     cf = CommentForm()
     if cf.validate_on_submit():
